@@ -1,4 +1,22 @@
 # ZABCOMBAIN #
+## О программе
+Эта программа помогает формировать отчеты, и добавляет результаты работы комнады пинг.
+Например получаем такой вывод:
+
+```
+name     :Z. server
+hostname :Z. server
+issue    :Disk I/O is overloaded on Z. server
+agetime  :4d 1h 18m
+PING 127.0.0.1 (127.0.0.1) 56(84) bytes of data.
+64 bytes from 127.0.0.1: icmp_seq=1 ttl=64 time=0.309 ms
+64 bytes from 127.0.0.1: icmp_seq=2 ttl=64 time=0.281 ms
+64 bytes from 127.0.0.1: icmp_seq=3 ttl=64 time=0.173 ms
+
+--- 127.0.0.1 ping statistics ---
+3 packets transmitted, 3 received, 0% packet loss, time 1999ms
+rtt min/avg/max/mdev = 0.173/0.254/0.309/0.060 ms
+```
 
 pypi version 1.0.0
 
