@@ -1,0 +1,71 @@
+# ZABCOMBAIN #
+
+pypi version 1.0.0
+
+## Требования
+* Python >=3
+* Tested against Zabbix 1.8 through 3.4
+* wxPython python library  
+Download: https://wxpython.org/pages/downloads/
+
+## Документация ##
+### Начало работы
+
+Скачайте zip файл или ``git clone`` проект  **zabcombain**.
+Перейдите в папку проекта.
+
+В консоли
+```bash
+$ python3 setup.py install
+```
+Запуск программы:
+```bash
+$ zabcombain
+```
+#### Main page:
+> * Для подключения к серверу необходимо в ***'settings'*** указать адрес сервера.
+> * Далее ввести логин и пароль для работы.
+> * После успешного подключения в консоль выводится ***connect***
+
+#### Oreder page:
+> * Что бы сформировать данные о событии скопируйте данные из ***dashboard - action***.
+
+```
+Z. server	Disk I/O is overloaded on Z. server	3d 23h 13m		No
+```
+> * Нажмите ***'paste'***, чтобы вставить данные.
+> * Нажмите ***'proccess'***, чтобы данные начали обрабатываться.
+> * Нажмите ***'copy'***, чтобы скопировать обработанные данные.
+> * Галочка ***'Contin.'***, позволяет не очищать поля ввода/вывода.
+
+#### Ping page
+
+> * Нажмите ***'update'***.
+> * Выберите ***'host group'***.
+> * Выберите ***'hosts'***.
+> * Нажмите ***'ping'***.
+> * Программа пропингует все интерфейсы хоста, результаты выводит в консоль.
+
+
+## License ##
+LGPL 2.1   http://www.gnu.org/licenses/old-licenses/lgpl-2.1.html
+
+Zabbix API Python Library.
+
+Original Ruby Library is Copyright (C) 2009 Andrew Nelson nelsonab(at)red-tux(dot)net
+
+Original Python Library is Copyright (C) 2009 Brett Lentz brett.lentz(at)gmail(dot)com
+
+This library is free software; you can redistribute it and/or
+modify it under the terms of the GNU Lesser General Public
+License as published by the Free Software Foundation; either
+version 2.1 of the License, or (at your option) any later version.
+
+This library is distributed in the hope that it will be useful,
+but WITHOUT ANY WARRANTY; without even the implied warranty of
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+Lesser General Public License for more details.
+
+You should have received a copy of the GNU Lesser General Public
+License along with this library; if not, write to the Free Software
+Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA

@@ -1,0 +1,5 @@
+run.py
+build
+dist/
+zabcombain.egg-info/
+zabcombain/*.pyc
