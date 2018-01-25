@@ -1,7 +1,7 @@
 # ZABCOMBAIN #
 ## About
-This program helps you to generate reports, and adds the results of the ping team.
-For example, we get such a conclusion:
+This program helps you to generate reports, and adds the results of the ping command.
+For example, we get such a results:
 
 ```
 name     :Z. server

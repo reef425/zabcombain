@@ -75,7 +75,7 @@ def getItems(text):
             if len(items)!=1:
                 yield items
 
-def getScript(api,host,count):
+def getScript(api,host):
     if host.setdefault("pingresult",True):
         host.update([("pingresult",[])])
     result = ""
@@ -83,29 +83,34 @@ def getScript(api,host,count):
          result= api.script.execute(hostid=host.get("hostid"),scriptid="1")
     except Exception as err:
         print(err)
-    # print("res ",result)
     host.get("pingresult").append(result.get("value").encode())
-    count.append(0)
 
-def pingOS(api,host,count):
+
+def pingFromOS(ip):
+    if osname == "nt":
+        pcArg="-n 3"
+    else:
+        pcArg="-c 3"
+    proc = Popen("ping %s %s"%(pcArg,ip),shell=True,stdout=PIPE)
+    out = proc.stdout.readlines()
+    res = b""
+    for row in out:
+        res+=row
+    return res
+
+
+def pingFromIface(api,host,ip,count):
     if host.setdefault("pingresult",True):
         host.update([("pingresult",[])])
-    pcArg="-n 3"
-    for iface in host.get("interfaces"):
-        if iface.get("main")=="0":
-            proc = Popen("ping %s %s"%(pcArg,iface.get("ip")),shell=True,stdout=PIPE)
-            out = proc.stdout.readlines()
-            res = b""
-            for row in out:
-                res+=row
-            if osname == "nt":
-                host.get("pingresult").append(res.decode("cp866"))
-            else:
-                host.get("pingresult").append(res.decode())
+    res = pingFromOS(ip)
+    if osname == "nt":
+        res = res.decode("cp866")
+    else:
+        res = res.decode()
+    host.get("pingresult").append(res)
     count.append(0)
 
 def PingRuner(api,hosts):
-    # print("Start ping")
     count =[]
     ifaceCount = 0
     hostCount=0
@@ -113,23 +118,28 @@ def PingRuner(api,hosts):
         hostCount+=1
         if hostCount==15:
             hostCount=0
-            # print("Many requests, 20 second timeout")
             time.sleep(20)
-        ifaceCount+=len(host.get("interfaces"))
+        ifaceCount=ifaceCount+len(host.get("interfaces"))-1
         try:
-            t = Thread(target=getScript,args=[api,host,count],name=host.get("hostid"))
+            t = Thread(target=getScript,args=[api,host],name=host.get("hostid"))
             t.start()
         except Exception as er:
             print("error start Thread",er)
+        print('len',len(host.get("interfaces")))
         if len(host.get("interfaces"))>1:
             for iface in host.get("interfaces"):
-                try:
-                    t = Thread(target=pingOS,args=[api,host,count],name=host.get("hostid")+"-os")
-                    t.start()
-                except Exception as er:
-                    print("error start Thread")
-        time.sleep(1)
+                print(iface)
+                if iface["main"]=="0":
+                    try:
+                        t = Thread(target=pingFromIface,args=[api,host,iface["ip"],count],name=iface["interfaceid"])
+                        t.start()
+                    except Exception as er:
+                        print("error start Thread")
+                time.sleep(1)
+        time.sleep(2)
+    # print()
     while True:
+        print(len(count))
         if ifaceCount==len(count):
             break
     # print("End work ping runner!")

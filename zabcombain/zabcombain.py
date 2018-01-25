@@ -1,7 +1,7 @@
 from wx import Window,Notebook,Panel,StaticText,TextCtrl,Button,Frame,App,BoxSizer,CheckBox,Icon,ComboBox
 from wx import EVT_BUTTON,TE_MULTILINE,TE_READONLY,TE_PASSWORD,EXPAND, BITMAP_TYPE_ICO, EVT_COMBOBOX
 from zabcombain.zabmodule import getApi,PingRuner,initHost, initHostsFromData, initHostsFromServer
-from threading import Thread
+from threading import Thread,Lock
 from os import getlogin,getcwd,path,environ,name as osname
 import configparser
 
@@ -67,20 +67,22 @@ class PageOrder(Panel):
         self.Bind(EVT_BUTTON, self.OnSelectCopy, self.copyButton)
 
     def setDataRun(self):
+        lock = Lock()
         initHostsFromServer(self.api,self.hosts)
         PingRuner(self.api,self.hosts)
-        if not self.outputCheckBox.IsChecked():
-            self.outputfield.Clear()
-        for host in self.hosts:
-            res="{:<9}:{}\n".format("name",host.get("name"))
-            res+="{:<9}:{}\n".format("hostname",host.get("host"))
-            for issue in host.get("issues"):
-                res+="{:<9}:{}\n".format("issue",issue.get("issue"))
-                res+="{:<9}:{}\n".format("agetime",issue.get("agetime"))
-            self.outputfield.AppendText(res)
-            for item in host.get("pingresult"):
-                self.outputfield.WriteText(item)
-            self.outputfield.AppendText("\n")
+        with lock:
+            if not self.outputCheckBox.IsChecked():
+                self.outputfield.Clear()
+            for host in self.hosts:
+                res="{:<9}:{}\n".format("name",host.get("name"))
+                res+="{:<9}:{}\n".format("hostname",host.get("host"))
+                for issue in host.get("issues"):
+                    res+="{:<9}:{}\n".format("issue",issue.get("issue"))
+                    res+="{:<9}:{}\n".format("agetime",issue.get("agetime"))
+                self.outputfield.AppendText(res)
+                for item in host.get("pingresult"):
+                    self.outputfield.WriteText(item)
+                self.outputfield.AppendText("\n")
         self.flags[0] = False
 
     def OnPressProcess(self,event):
@@ -109,7 +111,7 @@ class PageOrder(Panel):
                 if not self.inputCheckBox.IsChecked():
                     self.inputfield.Clear()
                 self.inputfield.Paste()
-                self.inputfield.AppendText("\n")
+                self.inputfield.WriteText("\n")
             else:
                 self.logfield.AppendText("Буфер обмена пуст\n")
 
@@ -193,7 +195,7 @@ class PagePing(Panel):
             if not self.flags[0]:
                 self.flags[0] = True
                 try:
-                    t = Thread(target=self.worker,args="",name="Set data")
+                    t = Thread(target=self.worker,args="",name="worker")
                     t.start()
                 except Exception as er:
                     print("error start Thread",er)
@@ -201,22 +203,25 @@ class PagePing(Panel):
                 self.logfield.AppendText("Пождите идет получение данных\n")
 
     def worker(self):
-        key = self.selectHost.GetStringSelection()
-        host = initHost()
-        host.update(self.hosts[key].items())
+        lock = Lock()
+        with lock:
+            key = self.selectHost.GetStringSelection()
+            host = initHost()
+            host.update(self.hosts[key].items())
         PingRuner(self.api,[host])
-        self.outputfield.Enable()
-        self.outputfield.Clear()
-        res="{:<9}:{}\n".format("name",host.get("name"))
-        res+="{:<9}:{}\n".format("hostname",host.get("host"))
-        self.outputfield.AppendText(res)
-        for item in host.get("pingresult"):
-            self.outputfield.WriteText(item)
+        with lock:
+            self.outputfield.Enable()
+            self.outputfield.Clear()
+            res="{:<9}:{}\n".format("name",host.get("name"))
+            res+="{:<9}:{}\n".format("hostname",host.get("host"))
+            self.outputfield.AppendText(res)
+            for item in host.get("pingresult"):
+                self.outputfield.WriteText(item)
+                self.outputfield.WriteText("\n")
         self.flags[0] = False
 
     def getGroups(self):
         for item in self.api.hostgroup.get():
-            print(item)
             yield item["name"],item["groupid"]
 
     def getHosts(self, groupid = None):
@@ -226,7 +231,7 @@ class PagePing(Panel):
 
 class Settings():
     def __init__(self):
-        self.defaultValue = "[server]\nhost = 127.0.0.1/zabbix\n"
+        self.defaultValue = "[server]\nhost = http://127.0.0.1/zabbix\n"
         if osname == "nt":
             self.home = environ["HOMEPATH"]
         else:
