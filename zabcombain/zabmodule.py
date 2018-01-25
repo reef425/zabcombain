@@ -128,7 +128,6 @@ def PingRuner(api,hosts):
             t.start()
         except Exception as er:
             print("error start Thread",er)
-        print('len',len(host.get("interfaces")))
         if len(host.get("interfaces"))>1:
             for iface in host.get("interfaces"):
                 if iface["main"]=="0":
@@ -139,9 +138,7 @@ def PingRuner(api,hosts):
                         print("error start Thread")
                 time.sleep(1)
         time.sleep(2)
-    # print()
     while True:
-        print(len(count))
         if ifaceCount==len(count):
             break
     # print("End work ping runner!")
