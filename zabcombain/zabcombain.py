@@ -233,7 +233,7 @@ class Settings():
     def __init__(self):
         self.defaultValue = "[server]\nhost = http://127.0.0.1/zabbix\n"
         if osname == "nt":
-            self.home = environ["HOMEPATH"]
+            self.home = path.join("c:\\",environ["HOMEPATH"])
         else:
             self.home = environ["HOME"]
         self.here = path.join(self.home,".zabcombain")
