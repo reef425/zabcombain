@@ -2,4 +2,4 @@ run.py
 build
 dist/
 zabcombain.egg-info/
-zabcombain/*.pyc
+zabcombain/__pycache__/*.pyc
