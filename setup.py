@@ -43,8 +43,5 @@ setup(
         'console_scripts':[
             'zabcombain=zabcombain:main',
         ],
-        'gui_scripts':[
-            'zabcombain=zabcombain:main',
-        ]
     },
 )
