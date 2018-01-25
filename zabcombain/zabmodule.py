@@ -77,7 +77,7 @@ def getItems(text):
 
 def getScript(api,host,count):
     runRemoteServerScript(api,host)
-    count.append[0]
+    count.append(0)
 
 def runRemoteServerScript(api,host):
     if host.setdefault("pingresult",True):
