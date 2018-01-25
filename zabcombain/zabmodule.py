@@ -75,7 +75,11 @@ def getItems(text):
             if len(items)!=1:
                 yield items
 
-def getScript(api,host):
+def getScript(api,host,count):
+    runRemoteServerScript(api,host)
+    count.append[0]
+
+def runRemoteServerScript(api,host):
     if host.setdefault("pingresult",True):
         host.update([("pingresult",[])])
     result = ""
@@ -84,7 +88,6 @@ def getScript(api,host):
     except Exception as err:
         print(err)
     host.get("pingresult").append(result.get("value").encode())
-
 
 def pingFromOS(ip):
     if osname == "nt":
@@ -119,16 +122,15 @@ def PingRuner(api,hosts):
         if hostCount==15:
             hostCount=0
             time.sleep(20)
-        ifaceCount=ifaceCount+len(host.get("interfaces"))-1
+        ifaceCount=ifaceCount+len(host.get("interfaces"))
         try:
-            t = Thread(target=getScript,args=[api,host],name=host.get("hostid"))
+            t = Thread(target=getScript,args=[api,host,count],name=host.get("hostid"))
             t.start()
         except Exception as er:
             print("error start Thread",er)
         print('len',len(host.get("interfaces")))
         if len(host.get("interfaces"))>1:
             for iface in host.get("interfaces"):
-                print(iface)
                 if iface["main"]=="0":
                     try:
                         t = Thread(target=pingFromIface,args=[api,host,iface["ip"],count],name=iface["interfaceid"])
