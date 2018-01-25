@@ -1,5 +1,6 @@
 run.py
 build
+__pycache__/
 dist/
 zabcombain.egg-info/
-zabcombain/__pycache__/*.pyc
+zabcombain/__pycache__/
