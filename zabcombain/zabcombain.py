@@ -39,19 +39,19 @@ class PageMain(Panel):
             self.logfield.WriteText("Server v. "+version+"\n")
         else:
             self.logfield.SetInsertionPointEnd()
-            self.logfield.WriteText("Не подключены к серверу"+"\n")
+            self.logfield.WriteText("no connection to server"+"\n")
 
 class PageOrder(Panel):
     def __init__(self, parent):
         Panel.__init__(self, parent)
         w,h = self.GetParent().GetSize()
-        #  self.logfield вывод логов
+        #  self.logfield
         self.logfield = parent.GetParent().GetParent().logfield
         # Zabbix api - self.api
         self.api = None
-        # self.flags - флаг завершения фонового процесса self.process
+        # self.flags - self.process
         self.flags = [False]
-        # Описание Input рабочей области
+        #  Input
         self.inputLabel = StaticText(self,label="Input", pos =(5,5))
         self.inputfield = TextCtrl(self,value="", size = (w-80,160), pos =(5,25),style=TE_MULTILINE)
         self.pasteButton = Button(self, size =(60,25), label="Paste", pos =(w-70,25))
@@ -59,7 +59,7 @@ class PageOrder(Panel):
         self.inputCheckBox = CheckBox(self,label="Contin.",pos=(w-70,85))
         self.Bind(EVT_BUTTON, self.OnPressPaste, self.pasteButton)
         self.Bind(EVT_BUTTON, self.OnPressProcess, self.proccButton)
-        # Описание Output рабочей области
+        # Output
         self.outputLabel = StaticText(self,label="Output", pos =(5,210))
         self.outputfield = TextCtrl(self,value="", size = (w-80,160), pos =(5,230),style=TE_MULTILINE)
         self.copyButton = Button(self, size =(60,25), label="Copy", pos =(w-70,230))
@@ -88,10 +88,10 @@ class PageOrder(Panel):
     def OnPressProcess(self,event):
         self.api = self.GetParent().GetParent().GetParent().api
         if not self.api:
-            self.logfield.AppendText("Не подключены к серверу\n")
+            self.logfield.AppendText("no connection to server\n")
         else:
             if self.flags[0]:
-                self.logfield.AppendText("Подождите идет получение данных\n")
+                self.logfield.AppendText("Wait getting data\n")
             else:
                 self.hosts = initHostsFromData(self.getItems())
                 self.logfield.SetInsertionPointEnd()
@@ -113,19 +113,19 @@ class PageOrder(Panel):
                 self.inputfield.Paste()
                 self.inputfield.WriteText("\n")
             else:
-                self.logfield.AppendText("Буфер обмена пуст\n")
+                self.logfield.AppendText("Buffer is empty\n")
 
     def OnSelectCopy(self,event):
             if self.outputfield.IsEmpty():
-                self.logfield.AppendText("Output пустой\n")
+                self.logfield.AppendText("Output is empty\n")
             else:
                 if self.outputfield.CanCopy():
                     self.outputfield.Copy()
-                    self.logfield.AppendText("Выделенный текст скопирован\n")
+                    self.logfield.AppendText("selected text copied\n")
                 else:
                     self.outputfield.SelectAll()
                     self.outputfield.Copy()
-                    self.logfield.AppendText("Весь текст скопирован\n")
+                    self.logfield.AppendText("all text copied\n")
                 self.outputfield.SelectNone()
 
     def getItems(self):
@@ -142,11 +142,11 @@ class PagePing(Panel):
     def __init__(self, parent):
         Panel.__init__(self, parent)
         w,h = self.GetParent().GetSize()
-        #  self.logfield вывод логов
+        #  self.logfield
         self.logfield = parent.GetParent().GetParent().logfield
         # Zabbix api - self.api
         self.api = None
-        # self.flags - флаг завершения фонового процесса self.process
+        # self.flags -
         self.flags = [False]
         items =["item %d"%(x+1) for x in range(10)]
         self.groupLabel = StaticText(self,label="Groups",pos=(5,5))
@@ -169,7 +169,7 @@ class PagePing(Panel):
     def OnUpdate(self,event):
         self.api = self.GetParent().GetParent().GetParent().api
         if not self.api:
-            self.logfield.AppendText("Не подключены к серверу\n")
+            self.logfield.AppendText("no connection to server\n")
         else:
             self.groups = dict(self.getGroups())
             items = list(self.groups.keys())
@@ -190,7 +190,7 @@ class PagePing(Panel):
 
     def OnPing(self,event):
         if not self.api:
-            self.logfield.AppendText("Не подключены к серверу\n")
+            self.logfield.AppendText("no connection to server\n")
         else:
             if not self.flags[0]:
                 self.flags[0] = True
@@ -200,7 +200,7 @@ class PagePing(Panel):
                 except Exception as er:
                     print("error start Thread",er)
             else:
-                self.logfield.AppendText("Пождите идет получение данных\n")
+                self.logfield.AppendText("Wait getting data\n")
 
     def worker(self):
         lock = Lock()
@@ -249,7 +249,6 @@ class Settings():
             with open(self.here,"w") as f:
                 f.write(self.defaultValue)
         self.parseSetting()
-        # self.textField.SetValue(self.readValue)
 
     def saveSetting(self,value):
         if self.readValue != value:
@@ -268,7 +267,6 @@ class SettingWindow(Frame):
         width = 300
         height = 300
         Frame.__init__(self,parent,title= "Settings",size=(width, height))
-        # super(SettingWindow, self).__init__(parrent)
         self.textField = TextCtrl(self,pos = (5,5),size=(width-20,height-80),style=TE_MULTILINE)
         self.buttonOk= Button(self,label = "Ok",pos = (5,height-60),size=(80,25) )
         self.buttonCancel = Button(self,label = "Cancel",pos = (90,height-60), size=(80,25))
@@ -277,7 +275,6 @@ class SettingWindow(Frame):
         self.settings = self.GetParent().GetParent().GetParent().GetParent().settings
         self.textField.SetValue(self.settings.readValue)
         self.Show()
-        # self.logfield = self.GetParent.logfield()
 
     def OnOK(self,event):
         value = self.textField.GetValue()

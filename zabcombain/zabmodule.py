@@ -43,9 +43,9 @@ def initHostsFromData(data):
 
 def getApi(hostname,login=None,password=None):
         if not login:
-             return "Non login",None
+             return "non login",None
         if not password:
-             return "Non password",None
+             return "non password",None
         from pyzabbix import ZabbixAPI, ZabbixAPIException
         zapi = None
         try:
@@ -56,7 +56,7 @@ def getApi(hostname,login=None,password=None):
             zapi.login(login,password)
         except Exception as e:
             return str(e),None
-        return "Server connect",zapi
+        return "server connect",zapi
 
 def initHostsFromServer(api,hosts):
     output=["hostid","host","name","description","groups","interfaces"]
@@ -141,4 +141,3 @@ def PingRuner(api,hosts):
     while True:
         if ifaceCount==len(count):
             break
-    # print("End work ping runner!")
