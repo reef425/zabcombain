@@ -80,11 +80,11 @@ def getScript(api,host,count):
     count.append(0)
 
 def runRemoteServerScript(api,host):
-    if host.setdefault("pingresult",True):
+    if host.setdefault("pingresult",False):
         host.update([("pingresult",[])])
-    result = ""
+    result = None
     try:
-         result= api.script.execute(hostid=host.get("hostid"),scriptid="1")
+        result= api.script.execute(hostid=host.get("hostid"),scriptid="1")
     except Exception as err:
         print(err)
     host.get("pingresult").append(result.get("value").encode())
