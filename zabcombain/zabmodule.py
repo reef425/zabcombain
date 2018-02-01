@@ -101,7 +101,6 @@ def pingFromOS(ip):
         res+=row
     return res
 
-
 def pingFromIface(api,host,ip,count):
     if host.setdefault("pingresult",True):
         host.update([("pingresult",[])])
