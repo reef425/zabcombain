@@ -10,6 +10,7 @@ def initHost():
             'host': '',
             'name': '',
             'description': '',
+            'pingresult':[],
             'groups': [{'groupid': '', 'name': '', 'internal': '', 'flags': ''}],
             'interfaces': [{'interfaceid': '',
                             'hostid': '',
@@ -80,8 +81,6 @@ def getScript(api,host,count):
     count.append(0)
 
 def runRemoteServerScript(api,host):
-    if host.setdefault("pingresult",False):
-        host.update([("pingresult",[])])
     result = None
     try:
         result= api.script.execute(hostid=host.get("hostid"),scriptid="1")
@@ -102,8 +101,6 @@ def pingFromOS(ip):
     return res
 
 def pingFromIface(api,host,ip,count):
-    if host.setdefault("pingresult",True):
-        host.update([("pingresult",[])])
     res = pingFromOS(ip)
     if osname == "nt":
         res = res.decode("cp866")
