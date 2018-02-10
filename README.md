@@ -18,26 +18,58 @@ PING 127.0.0.1 (127.0.0.1) 56(84) bytes of data.
 rtt min/avg/max/mdev = 0.173/0.254/0.309/0.060 ms
 
 ```
-pypi version 1.0.0
+pypi version 1.0.2
 
-## Requirements
+## Dependences
 * Python >=3
 * Tested against Zabbix 1.8 through 3.4
-* wxPython python library  
-Download: https://wxpython.org/pages/downloads/
+* Python3-dev packages for linux
+
+## Dependent packages in pip
+* pyzabbix - automatically installs
+* wxPython - can be manually set
+
+For Windows and MacOS
+> To install wxPython, type the command:
+```
+pip install -U wxPython
+```
+
+For Linux
+> To install wxPython, type the command:
+```
+pip install -U \
+    -f https://extras.wxpython.org/wxPython4/extras/linux/gtk3/(osname) \
+    wxPython
+```
+Instead (osname) you should choose from:
+>* centos-7
+>* debian-8
+>* debian-9
+>* fedora-23
+>* fedora-24
+>* fedora-26
+>* fedora-27
+>* ubuntu-14.04
+>* ubuntu-16.04  
+>
+>
+>More can be read here:
+https://wxpython.org/pages/downloads/
+
 
 ## Documentation ##
 ### Getting Started
 
-Download the zip file, or `git clone` the project **zabcombain**.
-Navigate to the project folder.
+* Download the `zip` file and unzip it. Go to the file folder `setup.py`.
+* Or use `git` to clone the ** zabcombain** project. Go to the folder with the file `setup.py`.
 
 In the console
-```bash
-$ pip setup.py install
+```
+$ python3 setup.py install
 ```
 Run util:
-```bash
+```
 $ zabcombain
 ```
 #### Main page:
@@ -54,14 +86,14 @@ Z. server Disk I/O is overloaded on server Z. No 3d 23h 13m
 > * Click ***'paste'*** to paste the data.
 > * Click ***'proccess'*** that the data started to be processed.
 > * Click ***'copy'*** to copy the processed data.
-> * The Tick ***'Contin.'***, allows to clear the fields of the input/output.
+> * The Tick ***'Contin.'*** , allows to clear the fields of the input/output.
 
 #### The Ping page
 
-> * Click ***'update'***.
-> * Select ***'host group'***.
-> * Select ***'hosts'***.
-> * Click ***'ping'***.
+> * Click ***'update'*** .
+> * Select ***'host group'*** .
+> * Select ***'hosts'*** .
+> * Click ***'ping'*** .
 > * The program ping all interfaces on the host, the results are displayed in the console.
 
 
