@@ -36,7 +36,6 @@ pip install -U wxPython
 ```
 
 Для  Linux
-
 > Что бы установить wxPython, наберите команду:
 ```
 pip install -U \
