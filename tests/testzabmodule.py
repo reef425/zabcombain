@@ -15,6 +15,16 @@ class TestMethod(unittest.TestCase):
         {'hostid': '135','main': '0','type': '3','ip': '127.0.0.1'},
         {'hostid': '245','main': '0','type': '4','ip': '127.0.0.1'}
         )
+        ##############   add TESTLIST2 ###################
+        self.TESTLIST2 = ({'hostid': '3425','main': '1','type': '1','ip': '127.0.0.1'},
+        {'hostid': '342','main': '1','type': '2','ip': '127.0.0.2'},
+        {'hostid': '425','main': '1','type': '3','ip': '127.0.0.3'},
+        {'hostid': '442','main': '1','type': '4','ip': '127.0.0.4'},
+        {'hostid': '465','main': '0','type': '1','ip': '127.0.0.1'},
+        {'hostid': '405','main': '0','type': '2','ip': '127.0.0.2'},
+        {'hostid': '135','main': '0','type': '3','ip': '127.0.0.3'},
+        {'hostid': '245','main': '0','type': '4','ip': '127.0.0.4'}
+        )
         pass
 
     def test_checkingList_1(self):
