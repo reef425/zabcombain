@@ -109,6 +109,21 @@ def pingFromIface(api,host,ip,count):
     host.get("pingresult").append(res)
     count.append(0)
 
+def checkingList(interfaces):
+    result = []
+    result.append(interfaces[0])
+    flag = 1
+    for iface in interfaces:
+        for res in result:
+            if iface['ip']==res['ip']:
+                    flag =0
+        if flag:
+            result.append(iface)
+        flag = 1
+    return result
+
+
+
 def PingRuner(api,hosts):
     count =[]
     ifaceCount = 0
