@@ -139,7 +139,7 @@ def changeInterfaceList(interfaces):
     if len(mainifaces)>0:
         mainifaces.sort(key= sortByType)
     mainifaces[0]['main'] = '1'
-    interfaces = checkingList(mainifaces + result)
+    return checkingList(mainifaces + result)
 
 def PingRuner(api,hosts):
     count =[]
