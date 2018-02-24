@@ -109,6 +109,11 @@ def pingFromIface(api,host,ip,count):
     host.get("pingresult").append(res)
     count.append(0)
 
+def sortByType(iface):
+    return iface['type']
+
+
+
 def checkingList(interfaces):
     result = []
     result.append(interfaces[0])
