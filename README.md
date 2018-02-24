@@ -18,7 +18,7 @@ PING 127.0.0.1 (127.0.0.1) 56(84) bytes of data.
 rtt min/avg/max/mdev = 0.173/0.254/0.309/0.060 ms
 
 ```
-pypi version 1.0.2
+pypi version 1.0.3
 
 ## Dependences
 * Python >=3

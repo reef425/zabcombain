@@ -11,7 +11,7 @@ with open(path.join(here,'README.md'),encoding='utf-8') as target:
 
 setup(
     name = NAME,
-    version = '1.0.2',
+    version = '1.0.3',
     license = 'LGPL',
     classifiers = [
          # How mature is this project? Common values are
