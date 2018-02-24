@@ -150,7 +150,8 @@ def PingRuner(api,hosts):
         if hostCount==15:
             hostCount=0
             time.sleep(20)
-        ifaceCount=ifaceCount+len(host.get("interfaces"))
+        host.update([("interfaces",changeInterfaceList(host.get("interfaces")))])
+        ifaceCount = ifaceCount + len(host.get("interfaces"))
         try:
             t = Thread(target=getScript,args=[api,host,count],name=host.get("hostid"))
             t.start()
