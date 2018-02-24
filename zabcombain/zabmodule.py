@@ -122,7 +122,19 @@ def checkingList(interfaces):
         flag = 1
     return result
 
-
+def changeInterfaceList(interfaces):
+    mainifaces = []
+    result = []
+    for iface in interfaces:
+        if iface['main']=='1':
+            iface['main']=='0'
+            mainifaces.append(iface)
+        else:
+            result.append(iface)
+    if len(mainifaces)>0:
+        mainifaces.sort(key= sortByType)
+    mainifaces[0]['main'] = '1'
+    interfaces = checkingList(mainifaces + result)
 
 def PingRuner(api,hosts):
     count =[]
