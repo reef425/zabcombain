@@ -38,6 +38,6 @@ class TestMethod(unittest.TestCase):
         ]
         self.assertEqual(zabmodule.checkingList(self.TESTLIST2), res)
 
-    def test_changeInterfaceList_1(self):
+    def test_changeInterfaceList_3(self):
         interfaces = self.TESTLIST1
         self.assertEqual(zabmodule.changeInterfaceList(interfaces), [{'hostid': '3425','main': '1','type': '1','ip': '127.0.0.1'}])
