@@ -27,6 +27,12 @@ class TestMethod(unittest.TestCase):
         )
         pass
 
+    def setUp(self):
+        self.lhost = 'localhost'
+        self.iphost = '127.0.0.1'
+        pass
+
+
     def test_checkingList_1(self):
         self.assertEqual(zabmodule.checkingList(self.TESTLIST1)[0], {'hostid': '3425','main': '1','type': '1','ip': '127.0.0.1'})
 
@@ -41,3 +47,9 @@ class TestMethod(unittest.TestCase):
     def test_changeInterfaceList_3(self):
         interfaces = self.TESTLIST1
         self.assertEqual(zabmodule.changeInterfaceList(interfaces), [{'hostid': '3425','main': '1','type': '1','ip': '127.0.0.1'}])
+
+    def testPingFromOS(self):
+        l = len(zabmodule.pingFromOS(None).decode().splitlines())
+        self.assertEqual(l,0)
+        l = len(zabmodule.pingFromOS(self.iphost).decode().splitlines())
+        self.assertEqual(l,8)
