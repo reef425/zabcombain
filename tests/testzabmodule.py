@@ -3,8 +3,12 @@ from zabcombain import zabmodule
 
 class TestMethod(unittest.TestCase):
     """docstring for TestMethod."""
-    def __init__(self, args):
-        super(TestMethod, self).__init__( args)
+    def __init__(self):
+        super(TestMethod, self).__init__()
+
+    def setUp(self):
+        self.lhost = 'localhost'
+        self.iphost = '127.0.0.1'
         ##############   add TESTLIST1 ###################
         self.TESTLIST1 = ({'hostid': '3425','main': '1','type': '1','ip': '127.0.0.1'},
         {'hostid': '342','main': '1','type': '2','ip': '127.0.0.1'},
@@ -25,28 +29,17 @@ class TestMethod(unittest.TestCase):
         {'hostid': '135','main': '0','type': '3','ip': '127.0.0.3'},
         {'hostid': '245','main': '0','type': '4','ip': '127.0.0.4'}
         )
-        pass
-
-    def setUp(self):
-        self.lhost = 'localhost'
-        self.iphost = '127.0.0.1'
-        pass
 
 
-    def test_checkingList_1(self):
+    def testCheckingList(self):
         self.assertEqual(zabmodule.checkingList(self.TESTLIST1)[0], {'hostid': '3425','main': '1','type': '1','ip': '127.0.0.1'})
-
-    def test_checkingList_2(self):
         res = [{'hostid': '3425','main': '1','type': '1','ip': '127.0.0.1'},
         {'hostid': '342','main': '1','type': '2','ip': '127.0.0.2'},
         {'hostid': '425','main': '1','type': '3','ip': '127.0.0.3'},
         {'hostid': '442','main': '1','type': '4','ip': '127.0.0.4'},
         ]
         self.assertEqual(zabmodule.checkingList(self.TESTLIST2), res)
-
-    def test_changeInterfaceList_3(self):
-        interfaces = self.TESTLIST1
-        self.assertEqual(zabmodule.changeInterfaceList(interfaces), [{'hostid': '3425','main': '1','type': '1','ip': '127.0.0.1'}])
+        self.assertEqual(zabmodule.changeInterfaceList(self.TESTLIST1), [{'hostid': '3425','main': '1','type': '1','ip': '127.0.0.1'}])
 
     def testPingFromOS(self):
         l = len(zabmodule.pingFromOS(None).decode().splitlines())
