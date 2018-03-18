@@ -89,6 +89,10 @@ def runRemoteServerScript(api,host):
     host.get("pingresult").append(result.get("value").encode())
 
 def pingFromOS(ip):
+    if ip is None:
+        return b"ip is None"
+    if ip=='':
+        return b'ip is empty'
     if osname == "nt":
         pcArg=['ping','-n','3',ip]
     else:
