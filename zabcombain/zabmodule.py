@@ -81,12 +81,17 @@ def getScript(api,host,count):
     count.append(0)
 
 def runRemoteServerScript(api,host):
+    if api is None:
+        return 'api is None'
+    if host is None:
+        return 'host is None'
     result = None
     try:
         result = api.script.execute(hostid=host.get("hostid"),scriptid="1")
     except Exception as err:
         print(err)
     host.get("pingresult").append(result.get("value").encode())
+    return 'ok'
 
 def pingFromOS(ip):
     if ip is None:
