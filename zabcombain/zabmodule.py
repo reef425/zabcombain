@@ -102,6 +102,7 @@ def pingFromOS(ip):
     res = b""
     for row in out:
         res+=row
+    proc.stdout.close()
     return res
 
 def pingFromIface(api,host,ip,count):
