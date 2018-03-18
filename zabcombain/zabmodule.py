@@ -83,17 +83,17 @@ def getScript(api,host,count):
 def runRemoteServerScript(api,host):
     result = None
     try:
-        result= api.script.execute(hostid=host.get("hostid"),scriptid="1")
+        result = api.script.execute(hostid=host.get("hostid"),scriptid="1")
     except Exception as err:
         print(err)
     host.get("pingresult").append(result.get("value").encode())
 
 def pingFromOS(ip):
     if osname == "nt":
-        pcArg="-n 3"
+        pcArg=['ping','-n','3',ip]
     else:
-        pcArg="-c 3"
-    proc = Popen("ping %s %s"%(pcArg,ip),shell=True,stdout=PIPE)
+        pcArg=['ping','-c','3',ip]
+    proc = Popen(pcArg,stdout=PIPE)
     out = proc.stdout.readlines()
     res = b""
     for row in out:
