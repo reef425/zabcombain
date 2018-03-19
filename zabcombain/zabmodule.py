@@ -77,8 +77,9 @@ def getItems(text):
                 yield items
 
 def getScript(api,host,count):
-    runRemoteServerScript(api,host)
+    res = runRemoteServerScript(api,host)
     count.append(0)
+    return res
 
 def runRemoteServerScript(api,host):
     if api is None:
@@ -152,6 +153,12 @@ def changeInterfaceList(interfaces):
     return checkingList(mainifaces + result)
 
 def PingRuner(api,hosts):
+    if api is None:
+        return "api is None"
+    if hosts is None:
+        return "hosts is None"
+    if hosts==[]:
+        return "hosts is empty"
     count =[]
     ifaceCount = 0
     hostCount=0
@@ -174,7 +181,7 @@ def PingRuner(api,hosts):
                         t = Thread(target=pingFromIface,args=[api,host,iface["ip"],count],name=iface["interfaceid"])
                         t.start()
                     except Exception as er:
-                        print("error start Thread")
+                        print("error start Thread", er)
                 time.sleep(1)
         time.sleep(2)
     while True:
