@@ -69,3 +69,35 @@ class TestMethod(unittest.TestCase):
         res = zabmodule.runRemoteServerScript(self.api,self.host)
         self.assertEqual(self.host.get("pingresult"),[self.scriptValue.encode()])
         self.assertEqual(res,'ok')
+
+    def setupForPingRuner(self):
+        self.hosts = []
+        interfaces = [
+        {'hostid': '1','main': '1','type': '1','ip': '127.0.0.127'},
+        {'hostid': '2','main': '0','type': '1','ip': '127.0.0.1'}
+        ]
+        for i in range(3):
+            self.hosts.append(zabmodule.initHost())
+        for i,item in enumerate(self.hosts):
+            interfaces[0].update([("hostid",str(i))])
+            interfaces[0].update([("interfaceid",str(i)+'1')])
+            interfaces[1].update([("hostid",str(i))])
+            interfaces[1].update([("interfaceid",str(i)+'2')])
+            item.update([('interfaces',interfaces),('hostid',str(i)),('host','id-'+str(i))])
+
+
+
+    def testFromPingRuner(self):
+        self.setupForPingRuner()
+        res = zabmodule.PingRuner(None,self.hosts)
+        self.assertEqual(res,'api is None')
+        res = zabmodule.PingRuner(self.api,None)
+        self.assertEqual(res,'hosts is None')
+        res = zabmodule.PingRuner(self.api,[])
+        self.assertEqual(res,'hosts is empty')
+        res = zabmodule.PingRuner(self.api,self.hosts)
+        for item in self.hosts:
+            res = item['pingresult']
+            self.assertEqual(res[0],self.scriptValue.encode())
+            l = len(res[1].splitlines())
+            self.assertEqual(l,8)
