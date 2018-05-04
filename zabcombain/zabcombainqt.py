@@ -1,6 +1,6 @@
 
 import sys
-from PyQt5.QtWidgets import (QWidget,QDesktopWidget, QToolTip, QPushButton, QApplication)
+from PyQt5.QtWidgets import (QWidget,QDesktopWidget,QTextEdit, QTabWidget, QToolTip, QPushButton, QApplication)
 from PyQt5.QtGui import QFont
 
 # from zabcombain.zabmodule import getApi,PingRuner,initHost, initHostsFromData, initHostsFromServer
@@ -10,6 +10,8 @@ from threading import Thread,Lock
 from os import getlogin,getcwd,path,environ,name as osname
 import configparser
 
+class PageMain(QWidget):
+    pass
 
 class Settings():
     def __init__(self):
@@ -56,7 +58,15 @@ class MainWindow(QWidget):
         QToolTip.setFont(QFont('SansSerif',10))
 
         self.setToolTip("This is <b>QWidget<b> widget")
-
+        # add panel
+        self.panel = QTabWidget(self)
+        self.panel.setGeometry(5,5,self.width-10,440)
+        self.panel.addTab(PageMain(),"Main")
+        self.panel.addTab(PageMain(),"Order")
+        self.panel.addTab(PageMain(),"Ping")
+        # add console
+        self.console = QTextEdit(self)
+        self.console.setGeometry(5,450,self.width-10,120)
         self.center()
         self.setWindowTitle('Zabcombain')
         self.show()
