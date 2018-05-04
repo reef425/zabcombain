@@ -136,7 +136,6 @@ class PageOrder(Panel):
                 if len(items)!=1:
                     yield items
 
-
 class PagePing(Panel):
     """docstring forPagePing"""
     def __init__(self, parent):
