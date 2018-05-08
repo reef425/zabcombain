@@ -1,17 +1,66 @@
 
 import sys
-from PyQt5.QtWidgets import (QWidget,QDesktopWidget,QTextEdit, QTabWidget, QToolTip, QPushButton, QApplication)
+from PyQt5.QtWidgets import (QMainWindow,QDialog,QWidget,QLineEdit, QDesktopWidget,QTextEdit, QTabWidget, QToolTip, QPushButton, QApplication)
 from PyQt5.QtGui import QFont
 
-# from zabcombain.zabmodule import getApi,PingRuner,initHost, initHostsFromData, initHostsFromServer
+# from zabmodule import getApi,PingRuner,initHost, initHostsFromData, initHostsFromServer
 
 from threading import Thread,Lock
 
 from os import getlogin,getcwd,path,environ,name as osname
 import configparser
+from unittest.mock import MagicMock
+
+class MockZabbix():
+
+    def __init__(self):
+        pass
+
+    def getlogin(self):
+        return "reef"
+
+    def getApi(self,*args,**kwargs):
+        return "connect",self
 
 class PageMain(QWidget):
-    pass
+    def __init__(self,*args,**kwargs):
+        """
+        for test
+        """
+        super().__init__(*args,**kwargs)
+        self.loginfield = QLineEdit(self)
+        self.loginfield.setText(getlogin())
+        self.loginfield.setGeometry(10,10,100,25)
+        self.passfield = QLineEdit(self)
+        self.passfield.setGeometry(10,40,100,25)
+        self.passfield.setEchoMode(2)
+        self.loginButton = QPushButton("login",self)
+        self.loginButton.setGeometry(10,70,100,25)
+        self.loginButton.pressed.connect(self.OnPressLogin)
+        self.settingButton = QPushButton("settings",self)
+        self.settingButton.setGeometry(10,100,100,25)
+        self.settingButton.pressed.connect(self.OnPressSetting)
+
+    def OnPressLogin(self):
+        mz = MockZabbix()
+        getApi = mz.getApi
+        parent = self.parentWidget().parentWidget().parentWidget()
+        parent.console.append(self.loginfield.text())
+        parent.console.append(self.passfield.text())
+        parent.console.append(parent.settings.hostname)
+        error,self.api = getApi(parent.settings.hostname, self.loginfield.text(),self.passfield.text())
+        parent.console.append(error+"\n")
+
+    def OnPressSetting(self):
+        win = QDialog(self)
+        w,h =200
+        win.resize(w,h)
+        console = QTextEdit(win)
+        console.setGeometry(5,5,w-10,h-50)
+
+        win.setVisible(True)
+
+
 
 class Settings():
     def __init__(self):
@@ -45,10 +94,11 @@ class Settings():
         config.read(self.here)
         self.hostname = config["server"]["host"]
 
-class MainWindow(QWidget):
-    def __init__(self):
-        super().__init__()
-
+class MainWindow(QMainWindow):
+    def __init__(self,*args,**kwargs):
+        super(MainWindow,self).__init__(*args,**kwargs)
+        self.api = None
+        self.settings = Settings()
         self.initUI()
 
     def initUI(self):
@@ -61,9 +111,9 @@ class MainWindow(QWidget):
         # add panel
         self.panel = QTabWidget(self)
         self.panel.setGeometry(5,5,self.width-10,440)
-        self.panel.addTab(PageMain(),"Main")
-        self.panel.addTab(PageMain(),"Order")
-        self.panel.addTab(PageMain(),"Ping")
+        self.panel.addTab(PageMain(self),"Main")
+        # self.panel.addTab(PageMain(),"Order")
+        # self.panel.addTab(PageMain(),"Ping")
         # add console
         self.console = QTextEdit(self)
         self.console.setGeometry(5,450,self.width-10,120)
@@ -79,7 +129,7 @@ class MainWindow(QWidget):
 
 if __name__ == '__main__':
     # Next, create an application object.
-    # QApplication.setDesktopSettingsAware(False)
+    QApplication.setDesktopSettingsAware(False)
     app = QApplication(sys.argv)
     # Show it.
     frame = MainWindow()
