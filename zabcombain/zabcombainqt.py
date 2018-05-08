@@ -1,7 +1,8 @@
 
 import sys
-from PyQt5.QtWidgets import (QMainWindow,QDialog,QWidget,QLineEdit, QDesktopWidget,QTextEdit, QTabWidget, QToolTip, QPushButton, QApplication)
+from PyQt5.QtWidgets import (QInputDialog,QMainWindow,QDialog,QWidget,QLineEdit, QDesktopWidget,QTextEdit, QTabWidget, QToolTip, QPushButton, QApplication)
 from PyQt5.QtGui import QFont
+from PyQt5 import Qt
 
 # from zabmodule import getApi,PingRuner,initHost, initHostsFromData, initHostsFromServer
 
@@ -52,13 +53,13 @@ class PageMain(QWidget):
         parent.console.append(error+"\n")
 
     def OnPressSetting(self):
-        win = QDialog(self)
-        w,h =200
-        win.resize(w,h)
-        console = QTextEdit(win)
-        console.setGeometry(5,5,w-10,h-50)
+        parent = self.parentWidget().parentWidget().parentWidget()
+        text, ok = QInputDialog.getMultiLineText(self, 'Settings',"Write otions",parent.settings.readValue)
+        if ok:
+            parent.settings.saveSetting(str(text))
 
-        win.setVisible(True)
+
+
 
 
 
