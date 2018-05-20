@@ -7,7 +7,7 @@ def main():
     QApplication.setDesktopSettingsAware(False)
     app = QApplication(sys.argv)
     # Show it.
-    frame = zabcombainqt.MainWindow()
+    frame = zabcombain.MainWindow()
     # Start the event loop.
     sys.exit(app.exec_())
 
