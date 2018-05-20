@@ -1,6 +1,4 @@
 run.py
-pingqt.py
-tm.py
 build
 __pycache__/
 dist/
