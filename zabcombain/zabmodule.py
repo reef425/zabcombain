@@ -124,8 +124,6 @@ def pingFromIface(api,host,ip,count):
 def sortByType(iface):
     return iface['type']
 
-
-
 def checkingList(interfaces):
     result = []
     result.append(interfaces[0])
@@ -153,75 +151,64 @@ def changeInterfaceList(interfaces):
     mainifaces[0]['main'] = '1'
     return checkingList(mainifaces + result)
 
-def do_work(host):
-    res = pingFromOS(host['ip']).decode()
-    print(host.get("name"),'\n',res)
+class TaskRuner():
+    def __init__(self):
+        self.tasks = queue.Queue()
+        self.threads = []
+        self.items = None
 
-def worker():
-    while True:
-        item = q.get()
-        if item is None:
-            break
-        do_work(item)
-        q.task_done()
-    print('finish --worker')
+    def do_start(self):
+        pass
 
-q = queue.Queue()
-threads = []
+    def do_work(self,*args, **kwargs):
+        pass
 
+    def do_end(self):
+        pass
 
-def PingRuner_Replicant(hosts):
-    for i in range(len(hosts)):
-        t = Thread(target=worker)
-        t.start()
-        threads.append(t)
+    def worker(self):
+        while True:
+            item = self.tasks.get()
+            if item is None:
+                break
+            self.do_work(item)
+            self.tasks.task_done()
 
-    for host in hosts:
-        q.put(host)
-
-    # block until all tasks are done
-    q.join()
-
-    # stop workers
-    for i in range(len(hosts)):
-        q.put(None)
-    for t in threads:
-        t.join()
-    print('finish --PingRuner')
-
-
-def PingRuner(api,hosts):
-    if api is None:
-        return "api is None"
-    if hosts is None:
-        return "hosts is None"
-    if hosts==[]:
-        return "hosts is empty"
-    count =[]
-    ifaceCount = 0
-    hostCount=0
-    for host in hosts:
-        hostCount+=1
-        if hostCount==15:
-            hostCount=0
-            time.sleep(20)
-        host.update([("interfaces",changeInterfaceList(host.get("interfaces")))])
-        ifaceCount = ifaceCount + len(host.get("interfaces"))
-        try:
-            t = Thread(target=getScript,args=[api,host,count],name=host.get("hostid"))
+    def run(self):
+        self.do_start()
+        for i in range(len(self.items)):
+            t = Thread(target=self.worker)
             t.start()
-        except Exception as er:
-            print("error start Thread",er)
-        if len(host.get("interfaces"))>1:
-            for iface in host.get("interfaces"):
-                if iface["main"]=="0":
-                    try:
-                        t = Thread(target=pingFromIface,args=[api,host,iface["ip"],count],name=iface["interfaceid"])
-                        t.start()
-                    except Exception as er:
-                        print("error start Thread", er)
-                time.sleep(1)
-        time.sleep(2)
-    while True:
-        if ifaceCount==len(count):
-            break
+            self.threads.append(t)
+
+        for item in self.items:
+            self.tasks.put(item)
+
+        # block until all tasks are done
+        self.tasks.join()
+
+        # stop workers
+        for i in range(len(self.items)):
+            self.tasks.put(None)
+        for t in self.threads:
+            t.join()
+        self.do_end()
+
+def pingRuner(hosts):
+
+    def iface_work(item):
+        res = pingFromOS(item['ip']).decode()
+        item.update([('res',res)])
+
+    def host_work(item):
+        # print(item.get("name"))
+        ifacesTasks = TaskRuner()
+        ifacesTasks.items = item['interfaces']
+        ifacesTasks.do_work = iface_work
+        ifacesTasks.run()
+
+
+    runHosts = TaskRuner()
+    runHosts.items = hosts
+    runHosts.do_work = host_work
+    runHosts.run()
