@@ -17,7 +17,7 @@ from PyQt5.QtGui import QFont
 from PyQt5.QtCore import *
 
 
-from zabmodule import getApi,PingRuner,initHost, initHostsFromData, initHostsFromServer
+from zabmodule import *
 
 from threading import Thread,Lock
 
@@ -91,15 +91,16 @@ class WorkerOrder(QThread):
 
         def getDataPing(self):
             initHostsFromServer(self.api,self.hosts)
-            PingRuner(self.api,self.hosts)
+            pingRuner(self.hosts)
             for host in self.hosts:
                 res="{:<9}:{}\n".format("name",host.get("name"))
                 res+="{:<9}:{}\n".format("hostname",host.get("host"))
                 for issue in host.get("issues"):
                     res+="{:<9}:{}\n".format("issue",issue.get("issue"))
                     res+="{:<9}:{}\n".format("agetime",issue.get("agetime"))
-            for item in host.get("pingresult"):
-                res += item.decode()
+                res+='\n'
+                for item in host['interfaces']:
+                    res += item['res']
             return res
 
         def run(self):
