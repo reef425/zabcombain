@@ -1,40 +1,12 @@
 
 import sys
 from PyQt5.QtWidgets import *
-#QInputDialog,
-#QLabel,
-#QMainWindow,
-#QDialog,
-#QWidget,
-#QLineEdit,
-#QDesktopWidget,
-#QPlainTextEdit,
-#QTabWidget,
-#QToolTip,
-#QPushButton,
-#QApplication)
 from PyQt5.QtGui import QFont
 from PyQt5.QtCore import *
-
-
 from zabmodule import *
-
 from threading import Thread,Lock
-
 from os import getlogin,getcwd,path,environ,name as osname
 import configparser
-from unittest.mock import MagicMock
-
-class MockZabbix():
-
-    def __init__(self):
-        pass
-
-    def getlogin(self):
-        return "reef"
-
-    def getApi(self,*args,**kwargs):
-        return "connect",self
 
 class Page(QWidget):
     def __init__(self,*args,**kwargs):
@@ -47,14 +19,14 @@ class Page(QWidget):
 
 class PageMain(Page):
     """
-    pass vvvTudf88
+    docstring PageMain
     """
     def __init__(self,*args,**kwargs):
         super().__init__(*args,**kwargs)
         self.loginfield = QLineEdit(self)
         self.loginfield.setText(getlogin())
         self.loginfield.setGeometry(10,10,100,25)
-        self.passfield = QLineEdit('vvvTudf88',self)
+        self.passfield = QLineEdit(self)
         self.passfield.setGeometry(10,40,100,25)
         self.passfield.setEchoMode(2)
         self.loginButton = QPushButton("login",self)
@@ -65,8 +37,6 @@ class PageMain(Page):
         self.settingButton.pressed.connect(self.OnPressSetting)
 
     def OnPressLogin(self):
-        # mz = MockZabbix()
-        # getApi = mz.getApi
         self.console.appendPlainText(self.loginfield.text())
         self.console.appendPlainText(self.passfield.text())
         self.console.appendPlainText(self.settings.hostname)
@@ -91,14 +61,17 @@ class WorkerOrder(QThread):
 
         def getDataPing(self):
             initHostsFromServer(self.api,self.hosts)
-            pingRuner(self.hosts)
+            pingRuner(self.api,self.hosts)
             for host in self.hosts:
                 res="{:<9}:{}\n".format("name",host.get("name"))
                 res+="{:<9}:{}\n".format("hostname",host.get("host"))
-                for issue in host.get("issues"):
-                    res+="{:<9}:{}\n".format("issue",issue.get("issue"))
-                    res+="{:<9}:{}\n".format("agetime",issue.get("agetime"))
-                res+='\n'
+                if host.setdefault('issues',False):
+                    for issue in host.get("issues"):
+                        res+="{:<9}:{}\n".format("issue",issue.get("issue"))
+                        res+="{:<9}:{}\n".format("agetime",issue.get("agetime"))
+                res+='\nZABBIX PING RESULT\n\n'
+                res+=host['pingresult']
+                res+='\nINTERFACES PING RESULT\n\n'
                 for item in host['interfaces']:
                     res += item['res']
             return res
@@ -116,9 +89,6 @@ class PageOrder(Page):
         # #  self.console
         # # Zabbix api - self.api
         self.api = None
-        # # self.flags - self.process
-        # self.flags = [False]
-        #  Input
         self.inputLabel = QLabel("Input",self)
         self.inputLabel.move(5,5)
         self.inputField = QPlainTextEdit(self)
@@ -131,8 +101,6 @@ class PageOrder(Page):
         self.inputCheckBox.move(w-70,85)
         self.pasteButton.pressed.connect(self.OnPressPaste)
         self.proccButton.pressed.connect(self.OnPressProcess)
-        # self.Bind(EVT_BUTTON, self.OnPressPaste, self.pasteButton)
-        # self.Bind(EVT_BUTTON, self.OnPressProcess, self.proccButton)
         # Output
         self.outputLabel = QLabel("Output",self)
         self.outputLabel.move(5,210)
@@ -140,8 +108,6 @@ class PageOrder(Page):
         self.outputField.setGeometry(5,230,w-80,160)
         self.copyButton = QPushButton("Copy",self)
         self.copyButton.setGeometry(w-70,230,60,25)
-        # self.outputCheckBox = QCheckBox("Contin.",self)
-        # self.outputCheckBox.move(w-70,260)
         self.copyButton.pressed.connect(self.OnSelectCopy)
 
 
@@ -153,9 +119,6 @@ class PageOrder(Page):
             self.inputField.appendPlainText("\n")
         else:
             self.console.appendPlainText("Buffer is empty\n")
-
-
-
 
     def OnPressProcess(self):
         if not self.parent.api:
@@ -203,6 +166,102 @@ class PageOrder(Page):
                 if len(items)!=1:
                     yield items
 
+class PagePing(Page):
+    def __init__(self,*args,**kwargs):
+        super().__init__(*args,**kwargs)
+        w = self.parentWidget().geometry().width()
+        h = self.parentWidget().geometry().height()
+        self.groupLb = QLabel('Groups',self)
+        self.groupLb.move(5,5)
+        self.selectGroup = QComboBox(self)
+        self.selectGroup.setGeometry(5,25,200,25)
+        self.selectGroup.setEnabled(False)
+        self.selectGroup.currentIndexChanged.connect(self.OnSelectGroup)
+        self.hostLb = QLabel("Hosts",self)
+        self.hostLb.move(5,55)
+        self.selectHost = QComboBox(self)
+        self.selectHost.setGeometry(5,75,200,25)
+        self.selectHost.setEnabled(False)
+        self.selectGroup.currentIndexChanged.connect(self.OnSelectHost)
+        # update button
+        self.updateBtn = QPushButton("Update",self)
+        self.updateBtn.setGeometry(210,25,100,25)
+        self.updateBtn.pressed.connect(self.onPressUpdate)
+        # ping button
+        self.pingButton = QPushButton("Ping",self)
+        self.pingButton.setGeometry(5,110,100,25)
+        self.pingButton.setEnabled(False)
+        self.pingButton.pressed.connect(self.OnPressPing)
+        # output field
+        self.outputLb = QLabel("Output",self)
+        self.outputLb.move(5,210)
+        self.outputField = QPlainTextEdit(self)
+        self.outputField.setGeometry(5,230,w-80,160)
+
+    def onPressUpdate(self):
+        if not self.parent.api:
+            self.console.appendPlainText("no connection to server\n")
+        else:
+            self.groups = dict(self.getGroups())
+            items = list(self.groups.keys())
+            items.sort()
+            self.selectGroup.addItems(items)
+            self.selectGroup.setEnabled(True)
+
+    def getGroups(self):
+        for item in self.parent.api.hostgroup.get():
+            yield item["name"],item["groupid"]
+
+    def getHosts(self, groupid = None):
+        output=["hostid","host","name","description","groups","interfaces"]
+        for item in self.parent.api.host.get(groupids=[groupid],filter={"status":"0"},output=output,selectInterfaces="extend"):
+            yield item["name"],item
+
+    def OnSelectGroup(self,index):
+        # self.console.appendPlainText()
+        key = self.selectGroup.currentText()
+        self.hosts = dict(self.getHosts(self.groups[key]))
+        items = list(self.hosts.keys())
+        items.sort()
+        self.selectHost.clear()
+        self.selectHost.addItems(items)
+        self.selectHost.setEnabled(True)
+
+    def OnSelectHost(self,index):
+        self.pingButton.setEnabled(True)
+
+    def OnPressPing(self):
+        if not self.parent.api:
+            self.console.appendPlainText("no connection to server\n")
+        else:
+            try:
+                if self.wo.isFinished():
+                    self.process()
+                else:
+                    self.console.appendPlainText("please wait\n")
+            except AttributeError:
+                self.process()
+
+    def process(self):
+        key = self.selectHost.currentText()
+        host = initHost()
+        host.update(self.hosts[key].items())
+        self.hosts = [host]
+        self.console.appendPlainText("Hosts = %d\n"%len(self.hosts))
+        for i,v in enumerate(self.hosts):
+            self.console.appendPlainText("%d %s\n"%(i+1,v.get("name")))
+        try:
+            self.wo = WorkerOrder()
+            self.wo.setAPI(self.parent.api)
+            self.wo.setHosts(self.hosts)
+            self.wo.start()
+            self.wo.finished.connect(self.getWorkerResult)
+        except Exception as er:
+            print("error start Thread",er)
+
+    def getWorkerResult(self,res):
+        self.outputField.appendPlainText(res)
+        self.outputField.appendPlainText('\n')
 
 class Settings():
     def __init__(self):
@@ -248,19 +307,14 @@ class MainWindow(QMainWindow):
         self.height = 600
         self.resize(self.width,self.height)
         QToolTip.setFont(QFont('SansSerif',10))
-
-        self.setToolTip("This is <b>QWidget<b> widget")
-        # add panel
-        # self.panel.addTab(PageMain(),"Order")
-        # self.panel.addTab(PageMain(),"Ping")
-        # add console
+        self.setToolTip("Zabcombain")
         self.console = QPlainTextEdit(self)
         self.console.setGeometry(5,450,self.width-10,120)
         self.panel = QTabWidget(self)
         self.panel.setGeometry(5,5,self.width-10,440)
         self.panel.addTab(PageMain(self.panel),"Main")
         self.panel.addTab(PageOrder(self.panel),"Oreders")
-        self.panel.addTab(Page(self.panel),"Page")
+        self.panel.addTab(PagePing(self.panel),"Ping")
         self.center()
         self.setWindowTitle('Zabcombain')
         self.show()
