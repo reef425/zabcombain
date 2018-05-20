@@ -4,18 +4,30 @@
 Например получаем такой вывод:
 
 ```
-name     :Z. server
-hostname :Z. server
-issue    :Disk I/O is overloaded on Z. server
-agetime  :4d 1h 18m
+name     :Zabbix server
+hostname :Zabbix server
+
+ZABBIX PING RESULT
+
 PING 127.0.0.1 (127.0.0.1) 56(84) bytes of data.
-64 bytes from 127.0.0.1: icmp_seq=1 ttl=64 time=0.309 ms
-64 bytes from 127.0.0.1: icmp_seq=2 ttl=64 time=0.281 ms
-64 bytes from 127.0.0.1: icmp_seq=3 ttl=64 time=0.173 ms
+64 bytes from 127.0.0.1: icmp_seq=1 ttl=64 time=0.000 ms
+64 bytes from 127.0.0.1: icmp_seq=2 ttl=64 time=0.774 ms
+64 bytes from 127.0.0.1: icmp_seq=3 ttl=64 time=0.783 ms
 
 --- 127.0.0.1 ping statistics ---
-3 packets transmitted, 3 received, 0% packet loss, time 1999ms
-rtt min/avg/max/mdev = 0.173/0.254/0.309/0.060 ms
+3 packets transmitted, 3 received, 0% packet loss, time 2002ms
+rtt min/avg/max/mdev = 0.000/0.519/0.783/0.367 ms
+
+INTERFACES PING RESULT
+
+PING 127.0.0.1 (127.0.0.1) 56(84) bytes of data.
+64 bytes from 127.0.0.1: icmp_seq=1 ttl=64 time=0.052 ms
+64 bytes from 127.0.0.1: icmp_seq=2 ttl=64 time=0.078 ms
+64 bytes from 127.0.0.1: icmp_seq=3 ttl=64 time=0.040 ms
+
+--- 127.0.0.1 ping statistics ---
+3 packets transmitted, 3 received, 0% packet loss, time 2025ms
+rtt min/avg/max/mdev = 0.040/0.056/0.078/0.018 ms
 ```
 
 pypi version 1.0.3
@@ -27,7 +39,7 @@ pypi version 1.0.3
 
 ## Зависимые пакеты в pip
 * pyzabbix - устанавливается автоматически
-* wxPython - устанавливается вручную
+* PyQt5 - устанавливается вручную
 
 Для Windows и MacOS
 > Что бы установить wxPython, наберите команду:

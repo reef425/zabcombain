@@ -11,7 +11,7 @@ with open(path.join(here,'README.md'),encoding='utf-8') as target:
 
 setup(
     name = NAME,
-    version = '1.0.3',
+    version = '2.0.0',
     license = 'LGPL',
     classifiers = [
          # How mature is this project? Common values are
@@ -37,6 +37,7 @@ setup(
     packages = ['zabcombain'],
     install_requires = [
         'pyzabbix>=0.7.4',
+        'PyQt5'
     ],
     data_files = [('data', ['data/favicon.ico'])],
     entry_points = {

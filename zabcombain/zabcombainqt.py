@@ -1,9 +1,8 @@
-
 import sys
 from PyQt5.QtWidgets import *
-from PyQt5.QtGui import QFont
+from PyQt5.QtGui import QFont,QIcon
 from PyQt5.QtCore import *
-from zabmodule import *
+from .zabmodule import *
 from threading import Thread,Lock
 from os import getlogin,getcwd,path,environ,name as osname
 import configparser
@@ -74,6 +73,7 @@ class WorkerOrder(QThread):
                 res+='\nINTERFACES PING RESULT\n\n'
                 for item in host['interfaces']:
                     res += item['res']
+                    res+='\n'
             return res
 
         def run(self):
@@ -316,6 +316,11 @@ class MainWindow(QMainWindow):
         self.panel.addTab(PageOrder(self.panel),"Oreders")
         self.panel.addTab(PagePing(self.panel),"Ping")
         self.center()
+        here = path.abspath(path.dirname(__file__))
+        here = path.split(here)[0]
+        icon_file = path.join(here,'data','favicon.ico')
+        icon = QIcon(path.abspath(icon_file))
+        self.setWindowIcon(icon)
         self.setWindowTitle('Zabcombain')
         self.show()
 
@@ -330,6 +335,6 @@ if __name__ == '__main__':
     QApplication.setDesktopSettingsAware(False)
     app = QApplication(sys.argv)
     # Show it.
-    frame = MainWindow()
+    frame = MainWindow(None)
     # Start the event loop.
     sys.exit(app.exec_())
