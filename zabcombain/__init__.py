@@ -1,5 +1,5 @@
 import sys
-from . import zabcombainqt
+from . import zabcombain
 from PyQt5.QtWidgets import QApplication
 
 def main():
