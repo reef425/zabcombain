@@ -2,6 +2,7 @@ import time
 from threading import Thread
 from subprocess import Popen,PIPE
 from os import name as osname
+import queue
 
 
 
@@ -151,6 +152,43 @@ def changeInterfaceList(interfaces):
         mainifaces.sort(key= sortByType)
     mainifaces[0]['main'] = '1'
     return checkingList(mainifaces + result)
+
+def do_work(host):
+    res = pingFromOS(host['ip']).decode()
+    print(host.get("name"),'\n',res)
+
+def worker():
+    while True:
+        item = q.get()
+        if item is None:
+            break
+        do_work(item)
+        q.task_done()
+    print('finish --worker')
+
+q = queue.Queue()
+threads = []
+
+
+def PingRuner_Replicant(hosts):
+    for i in range(len(hosts)):
+        t = Thread(target=worker)
+        t.start()
+        threads.append(t)
+
+    for host in hosts:
+        q.put(host)
+
+    # block until all tasks are done
+    q.join()
+
+    # stop workers
+    for i in range(len(hosts)):
+        q.put(None)
+    for t in threads:
+        t.join()
+    print('finish --PingRuner')
+
 
 def PingRuner(api,hosts):
     if api is None:
