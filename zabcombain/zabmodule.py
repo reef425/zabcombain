@@ -11,7 +11,7 @@ def initHost():
             'host': '',
             'name': '',
             'description': '',
-            'pingresult':[],
+            'pingresult':'',
             'groups': [{'groupid': '', 'name': '', 'internal': '', 'flags': ''}],
             'interfaces': [{'interfaceid': '',
                             'hostid': '',
@@ -77,23 +77,18 @@ def getItems(text):
             if len(items)!=1:
                 yield items
 
-def getScript(api,host,count):
-    res = runRemoteServerScript(api,host)
-    count.append(0)
-    return res
 
 def runRemoteServerScript(api,host):
     if api is None:
-        return 'api is None'
+        print('api is None')
     if host is None:
-        return 'host is None'
+        print('host is None')
     result = None
     try:
         result = api.script.execute(hostid=host.get("hostid"),scriptid="1")
     except Exception as err:
         print(err)
-    host.get("pingresult").append(result.get("value").encode())
-    return 'ok'
+    host.update([("pingresult",result.get("value"))])
 
 def pingFromOS(ip):
     if ip is None:
@@ -111,45 +106,6 @@ def pingFromOS(ip):
         res+=row
     proc.stdout.close()
     return res
-
-def pingFromIface(api,host,ip,count):
-    res = pingFromOS(ip)
-    if osname == "nt":
-        res = res.decode("cp866")
-    else:
-        res = res.decode()
-    host.get("pingresult").append(res)
-    count.append(0)
-
-def sortByType(iface):
-    return iface['type']
-
-def checkingList(interfaces):
-    result = []
-    result.append(interfaces[0])
-    flag = 1
-    for iface in interfaces:
-        for res in result:
-            if iface['ip']==res['ip']:
-                    flag =0
-        if flag:
-            result.append(iface)
-        flag = 1
-    return result
-
-def changeInterfaceList(interfaces):
-    mainifaces = []
-    result = []
-    for iface in interfaces:
-        if iface['main']=='1':
-            iface['main']=='0'
-            mainifaces.append(iface)
-        else:
-            result.append(iface)
-    if len(mainifaces)>0:
-        mainifaces.sort(key= sortByType)
-    mainifaces[0]['main'] = '1'
-    return checkingList(mainifaces + result)
 
 class TaskRuner():
     def __init__(self):
@@ -194,14 +150,18 @@ class TaskRuner():
             t.join()
         self.do_end()
 
-def pingRuner(hosts):
+def pingRuner(api,hosts):
 
     def iface_work(item):
-        res = pingFromOS(item['ip']).decode()
+        res = pingFromOS(item['ip'])
+        if osname == "nt":
+            res = res.decode("cp866")
+        else:
+            res = res.decode()
         item.update([('res',res)])
 
     def host_work(item):
-        # print(item.get("name"))
+        runRemoteServerScript(api,item)
         ifacesTasks = TaskRuner()
         ifacesTasks.items = item['interfaces']
         ifacesTasks.do_work = iface_work
