@@ -30,7 +30,7 @@ PING 127.0.0.1 (127.0.0.1) 56(84) bytes of data.
 rtt min/avg/max/mdev = 0.040/0.056/0.078/0.018 ms
 ```
 
-pypi version 1.0.3
+pypi version 2.0.1
 
 ## Зависимости
 * Python >=3
@@ -41,32 +41,14 @@ pypi version 1.0.3
 * pyzabbix - устанавливается автоматически
 * PyQt5 - устанавливается вручную
 
-Для Windows и MacOS
-> Что бы установить wxPython, наберите команду:
+Для Linux, Windows и MacOS
+> Что бы установить PyQt5, наберите команду:
 ```
-pip install -U wxPython
+pip install PyQt5
+or
+pip install -r requirements.txt
 ```
-
-Для  Linux
-> Что бы установить wxPython, наберите команду:
-```
-pip install -U \
-    -f https://extras.wxpython.org/wxPython4/extras/linux/gtk3/(osname) \
-    wxPython
-```
-Вместо (osname) надо выбрать из:
->* centos-7
->* debian-8
->* debian-9
->* fedora-23
->* fedora-24
->* fedora-26
->* fedora-27
->* ubuntu-14.04
->* ubuntu-16.04  
->
->
->Подробнее можно почитать здесь: https://wxpython.org/pages/downloads/
+`
 
 ## Документация ##
 ### Начало работы
@@ -115,24 +97,5 @@ Z. server	Disk I/O is overloaded on Z. server	3d 23h 13m		No
 
 
 ## License ##
-LGPL 2.1   http://www.gnu.org/licenses/old-licenses/lgpl-2.1.html
-
-Zabbix API Python Library.
-
-Original Ruby Library is Copyright (C) 2009 Andrew Nelson nelsonab(at)red-tux(dot)net
-
-Original Python Library is Copyright (C) 2009 Brett Lentz brett.lentz(at)gmail(dot)com
-
-This library is free software; you can redistribute it and/or
-modify it under the terms of the GNU Lesser General Public
-License as published by the Free Software Foundation; either
-version 2.1 of the License, or (at your option) any later version.
-
-This library is distributed in the hope that it will be useful,
-but WITHOUT ANY WARRANTY; without even the implied warranty of
-MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
-Lesser General Public License for more details.
-
-You should have received a copy of the GNU Lesser General Public
-License along with this library; if not, write to the Free Software
-Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
+GPL v.3
+http://www.gnu.org/licenses/gpl-3.0.html
