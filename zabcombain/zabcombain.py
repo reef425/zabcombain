@@ -4,7 +4,7 @@ from PyQt5.QtGui import QFont,QIcon
 from PyQt5.QtCore import *
 from .zabmodule import *
 from threading import Thread,Lock
-from os import getlogin,getcwd,path,environ,name as osname
+from os import getcwd,path,environ,name as osname
 import configparser
 from datetime import datetime
 
@@ -28,7 +28,7 @@ class PageMain(Page):
     def __init__(self,*args,**kwargs):
         super().__init__(*args,**kwargs)
         self.loginfield = QLineEdit(self)
-        self.loginfield.setText(getlogin())
+        self.loginfield.setText(environ['username'])
         self.loginfield.setGeometry(10,10,100,25)
         self.passfield = QLineEdit(self)
         self.passfield.setGeometry(10,40,100,25)
