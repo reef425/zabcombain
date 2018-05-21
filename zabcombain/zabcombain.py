@@ -18,7 +18,7 @@ class Page(QWidget):
 
 
     def consoleLog(self,text):
-        dt = datetime.now().strftime('%Y-%m-%d %H:%M:%s')
+        dt = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
         self.console.appendPlainText(dt + ' ' + text)
 
 class PageMain(Page):
@@ -246,7 +246,7 @@ class PagePing(Page):
         key = self.selectHost.currentText()
         host = initHost()
         host.update(self.hosts[key].items())
-        self.consoleLog('Ping for '+host.get('name')))
+        self.consoleLog('Ping for '+host.get('name'))
         try:
             self.wo = WorkerOrder()
             self.wo.setAPI(self.parent.api)
