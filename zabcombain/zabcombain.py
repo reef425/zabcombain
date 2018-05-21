@@ -58,6 +58,7 @@ class PageMain(Page):
         text, ok = QInputDialog.getMultiLineText(self, 'Settings','Write otions',self.settings.readValue)
         if ok:
             self.settings.saveSetting(str(text))
+            self.settings.readSetting()
 
 class WorkerOrder(QThread):
         finished = pyqtSignal(str)
