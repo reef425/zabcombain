@@ -35,10 +35,7 @@ setup(
     author_email = 'reef425@gmail.com',
     keywords = 'monitoring zabbix zabix api wxpython',
     packages = ['zabcombain'],
-    install_requires = [
-        'pyzabbix>=0.7.4',
-        'PyQt5'
-    ],
+    install_requires = ['pyzabbix>=0.7.4'],
     data_files = [('data', ['data/favicon.ico'])],
     entry_points = {
         'console_scripts':[
