@@ -6,6 +6,7 @@ from .zabmodule import *
 from threading import Thread,Lock
 from os import getlogin,getcwd,path,environ,name as osname
 import configparser
+from datetime import datetime
 
 class Page(QWidget):
     def __init__(self,*args,**kwargs):
@@ -14,7 +15,11 @@ class Page(QWidget):
         self.parent = self.parentWidget().parentWidget()
         self.settings = self.parentWidget().parentWidget().settings
         self.console  = self.parentWidget().parentWidget().console
-        # self.api = None
+
+
+    def consoleLog(self,text):
+        dt = datetime.now().strftime('%Y-%m-%d %H:%M:%s')
+        self.console.appendPlainText(dt + ' ' + text)
 
 class PageMain(Page):
     """
@@ -28,19 +33,19 @@ class PageMain(Page):
         self.passfield = QLineEdit(self)
         self.passfield.setGeometry(10,40,100,25)
         self.passfield.setEchoMode(2)
-        self.loginButton = QPushButton("login",self)
+        self.loginButton = QPushButton('login',self)
         self.loginButton.setGeometry(10,70,100,25)
         self.loginButton.pressed.connect(self.OnPressLogin)
-        self.settingButton = QPushButton("settings",self)
+        self.settingButton = QPushButton('settings',self)
         self.settingButton.setGeometry(10,100,100,25)
         self.settingButton.pressed.connect(self.OnPressSetting)
 
     def OnPressLogin(self):
         error,self.parent.api = getApi(self.settings.hostname, self.loginfield.text(),self.passfield.text())
-        self.console.appendPlainText(error+"\n")
+        self.consoleLog(error)
 
     def OnPressSetting(self):
-        text, ok = QInputDialog.getMultiLineText(self, 'Settings',"Write otions",self.settings.readValue)
+        text, ok = QInputDialog.getMultiLineText(self, 'Settings','Write otions',self.settings.readValue)
         if ok:
             self.settings.saveSetting(str(text))
 
@@ -58,13 +63,14 @@ class WorkerOrder(QThread):
         def getDataPing(self):
             initHostsFromServer(self.api,self.hosts)
             pingRuner(self.api,self.hosts)
+            res = ''
             for host in self.hosts:
-                res="{:<9}:{}\n".format("name",host.get("name"))
-                res+="{:<9}:{}\n".format("hostname",host.get("host"))
+                res+='{:<9}:{}\n'.format('name',host.get('name'))
+                res+='{:<9}:{}\n'.format('hostname',host.get('host'))
                 if host.setdefault('issues',False):
-                    for issue in host.get("issues"):
-                        res+="{:<9}:{}\n".format("issue",issue.get("issue"))
-                        res+="{:<9}:{}\n".format("agetime",issue.get("agetime"))
+                    for issue in host.get('issues'):
+                        res+='{:<9}:{}\n'.format('issue',issue.get('issue'))
+                        res+='{:<9}:{}\n'.format('agetime',issue.get('agetime'))
                 res+='\nZABBIX PING RESULT\n\n'
                 res+=host['pingresult']
                 res+='\nINTERFACES PING RESULT\n\n'
@@ -74,36 +80,33 @@ class WorkerOrder(QThread):
             return res
 
         def run(self):
-            res = ''
-            res = self.getDataPing()
-            self.finished.emit(res)
+            self.finished.emit(self.getDataPing())
 
 class PageOrder(Page):
     def __init__(self,*args,**kwargs):
         super().__init__(*args,**kwargs)
         w = self.parentWidget().geometry().width()
         h = self.parentWidget().geometry().height()
-        # #  self.console
-        # # Zabbix api - self.api
+        # Zabbix api - self.api
         self.api = None
-        self.inputLabel = QLabel("Input",self)
+        self.inputLabel = QLabel('Input',self)
         self.inputLabel.move(5,5)
         self.inputField = QPlainTextEdit(self)
         self.inputField.setGeometry(5,25,w-80,160)
-        self.pasteButton = QPushButton("Paste",self)
+        self.pasteButton = QPushButton('Paste',self)
         self.pasteButton.setGeometry(w-70,25,60,25)
-        self.proccButton = QPushButton("Proccess",self)
+        self.proccButton = QPushButton('Proccess',self)
         self.proccButton.setGeometry(w-70,55,60,25)
-        self.inputCheckBox =  QCheckBox("Contin.",self)
+        self.inputCheckBox =  QCheckBox('Contin.',self)
         self.inputCheckBox.move(w-70,85)
         self.pasteButton.pressed.connect(self.OnPressPaste)
         self.proccButton.pressed.connect(self.OnPressProcess)
         # Output
-        self.outputLabel = QLabel("Output",self)
+        self.outputLabel = QLabel('Output',self)
         self.outputLabel.move(5,210)
         self.outputField = QPlainTextEdit(self)
         self.outputField.setGeometry(5,230,w-80,160)
-        self.copyButton = QPushButton("Copy",self)
+        self.copyButton = QPushButton('Copy',self)
         self.copyButton.setGeometry(w-70,230,60,25)
         self.copyButton.pressed.connect(self.OnSelectCopy)
 
@@ -113,27 +116,28 @@ class PageOrder(Page):
             if not self.inputCheckBox.checkState():
                 self.inputField.clear()
             self.inputField.paste()
-            self.inputField.appendPlainText("\n")
+            self.inputField.appendPlainText('\n')
         else:
-            self.console.appendPlainText("Buffer is empty\n")
+            self.consoleLog('Buffer is empty')
 
     def OnPressProcess(self):
         if not self.parent.api:
-            self.console.appendPlainText("no connection to server\n")
+            self.consoleLog('no connection to server')
         else:
             try:
                 if self.wo.isFinished():
                     self.process()
                 else:
-                    self.console.appendPlainText("please wait\n")
+                    self.consoleLog('please wait')
             except AttributeError:
                 self.process()
 
     def process(self):
         self.hosts = initHostsFromData(self.getItems())
-        self.console.appendPlainText("Hosts = %d\n"%len(self.hosts))
+        self.consoleLog('Order process')
+        self.consoleLog('Hosts = %d'%len(self.hosts))
         for i,v in enumerate(self.hosts):
-            self.console.appendPlainText("%d %s\n"%(i+1,v.get("name")))
+            self.consoleLog('%d %s'%(i+1,v.get('name')))
         try:
             self.wo = WorkerOrder()
             self.wo.setAPI(self.parent.api)
@@ -141,25 +145,25 @@ class PageOrder(Page):
             self.wo.start()
             self.wo.finished.connect(self.getWorkerResult)
         except Exception as er:
-            print("error start Thread",er)
+            print('error start Thread',er)
 
     def getWorkerResult(self,res):
+        self.outputField.clear()
         self.outputField.appendPlainText(res)
-        self.outputField.appendPlainText('\n')
 
     def OnSelectCopy(self):
-        if self.outputField.toPlainText()=="":
-            self.console.appendPlainText("Output is empty\n")
+        if self.outputField.toPlainText()=='':
+            self.consoleLog('Output is empty')
         else:
             self.outputField.selectAll()
             self.outputField.copy()
-            self.console.appendPlainText("all text copied\n")
+            self.consoleLog('all text copied')
 
     def getItems(self):
         text = str(self.inputField.toPlainText())
         if text:
-            for line in text.split("\n"):
-                items = line.split("\t")
+            for line in text.split('\n'):
+                items = line.split('\t')
                 if len(items)!=1:
                     yield items
 
@@ -171,33 +175,33 @@ class PagePing(Page):
         self.groupLb = QLabel('Groups',self)
         self.groupLb.move(5,5)
         self.selectGroup = QComboBox(self)
-        self.selectGroup.setGeometry(5,25,200,25)
+        self.selectGroup.setGeometry(5,25,220,25)
         self.selectGroup.setEnabled(False)
         self.selectGroup.currentIndexChanged.connect(self.OnSelectGroup)
-        self.hostLb = QLabel("Hosts",self)
+        self.hostLb = QLabel('Hosts',self)
         self.hostLb.move(5,55)
         self.selectHost = QComboBox(self)
-        self.selectHost.setGeometry(5,75,200,25)
+        self.selectHost.setGeometry(5,75,220,25)
         self.selectHost.setEnabled(False)
         self.selectGroup.currentIndexChanged.connect(self.OnSelectHost)
         # update button
-        self.updateBtn = QPushButton("Update",self)
-        self.updateBtn.setGeometry(210,25,100,25)
+        self.updateBtn = QPushButton('Update',self)
+        self.updateBtn.setGeometry(230,25,110,25)
         self.updateBtn.pressed.connect(self.onPressUpdate)
         # ping button
-        self.pingButton = QPushButton("Ping",self)
+        self.pingButton = QPushButton('Ping',self)
         self.pingButton.setGeometry(5,110,100,25)
         self.pingButton.setEnabled(False)
         self.pingButton.pressed.connect(self.OnPressPing)
         # output field
-        self.outputLb = QLabel("Output",self)
+        self.outputLb = QLabel('Output',self)
         self.outputLb.move(5,210)
         self.outputField = QPlainTextEdit(self)
         self.outputField.setGeometry(5,230,w-80,160)
 
     def onPressUpdate(self):
         if not self.parent.api:
-            self.console.appendPlainText("no connection to server\n")
+            self.consoleLog('no connection to server')
         else:
             self.groups = dict(self.getGroups())
             items = list(self.groups.keys())
@@ -207,15 +211,14 @@ class PagePing(Page):
 
     def getGroups(self):
         for item in self.parent.api.hostgroup.get():
-            yield item["name"],item["groupid"]
+            yield item['name'],item['groupid']
 
     def getHosts(self, groupid = None):
-        output=["hostid","host","name","description","groups","interfaces"]
-        for item in self.parent.api.host.get(groupids=[groupid],filter={"status":"0"},output=output,selectInterfaces="extend"):
-            yield item["name"],item
+        output=['hostid','host','name','description','groups','interfaces']
+        for item in self.parent.api.host.get(groupids=[groupid],filter={'status':'0'},output=output,selectInterfaces='extend'):
+            yield item['name'],item
 
     def OnSelectGroup(self,index):
-        # self.console.appendPlainText()
         key = self.selectGroup.currentText()
         self.hosts = dict(self.getHosts(self.groups[key]))
         items = list(self.hosts.keys())
@@ -229,13 +232,13 @@ class PagePing(Page):
 
     def OnPressPing(self):
         if not self.parent.api:
-            self.console.appendPlainText("no connection to server\n")
+            self.consoleLog('no connection to server')
         else:
             try:
                 if self.wo.isFinished():
                     self.process()
                 else:
-                    self.console.appendPlainText("please wait\n")
+                    self.consoleLog('please wait')
             except AttributeError:
                 self.process()
 
@@ -243,54 +246,51 @@ class PagePing(Page):
         key = self.selectHost.currentText()
         host = initHost()
         host.update(self.hosts[key].items())
-        self.hosts = [host]
-        self.console.appendPlainText("Hosts = %d\n"%len(self.hosts))
-        for i,v in enumerate(self.hosts):
-            self.console.appendPlainText("%d %s\n"%(i+1,v.get("name")))
+        self.consoleLog('Ping for '+host.get('name')))
         try:
             self.wo = WorkerOrder()
             self.wo.setAPI(self.parent.api)
-            self.wo.setHosts(self.hosts)
+            self.wo.setHosts([host])
             self.wo.start()
             self.wo.finished.connect(self.getWorkerResult)
         except Exception as er:
-            print("error start Thread",er)
+            print('error start Thread',er)
 
     def getWorkerResult(self,res):
+        self.outputField.clear()
         self.outputField.appendPlainText(res)
-        self.outputField.appendPlainText('\n')
 
 class Settings():
     def __init__(self):
-        self.defaultValue = "[server]\nhost = http://127.0.0.1/zabbix\n"
-        if osname == "nt":
-            self.home = path.join("c:\\",environ["HOMEPATH"])
+        self.defaultValue = '[server]\nhost = http://127.0.0.1/zabbix\n'
+        if osname == 'nt':
+            self.home = path.join('c:\\',environ['HOMEPATH'])
         else:
-            self.home = environ["HOME"]
-        self.here = path.join(self.home,".zabcombain")
+            self.home = environ['HOME']
+        self.here = path.join(self.home,'.zabcombain')
         self.hostname = None
         self.readSetting()
 
     def readSetting(self):
         if path.exists(self.here):
-            with open(self.here,"r") as f:
+            with open(self.here,'r') as f:
                 self.readValue = f.read()
         else:
             self.readValue=self.defaultValue
-            with open(self.here,"w") as f:
+            with open(self.here,'w') as f:
                 f.write(self.defaultValue)
         self.parseSetting()
 
     def saveSetting(self,value):
         if self.readValue != value:
-            with open(self.here,"w") as f:
+            with open(self.here,'w') as f:
                 f.write(value)
             self.readValue = value
 
     def parseSetting(self):
         config = configparser.ConfigParser()
         config.read(self.here)
-        self.hostname = config["server"]["host"]
+        self.hostname = config['server']['host']
 
 class MainWindow(QMainWindow):
     def __init__(self,*args,**kwargs):
@@ -304,14 +304,14 @@ class MainWindow(QMainWindow):
         self.height = 600
         self.resize(self.width,self.height)
         QToolTip.setFont(QFont('SansSerif',10))
-        self.setToolTip("Zabcombain")
+        self.setToolTip('Zabcombain')
         self.console = QPlainTextEdit(self)
         self.console.setGeometry(5,450,self.width-10,120)
         self.panel = QTabWidget(self)
         self.panel.setGeometry(5,5,self.width-10,440)
-        self.panel.addTab(PageMain(self.panel),"Main")
-        self.panel.addTab(PageOrder(self.panel),"Oreders")
-        self.panel.addTab(PagePing(self.panel),"Ping")
+        self.panel.addTab(PageMain(self.panel),'Main')
+        self.panel.addTab(PageOrder(self.panel),'Oreders')
+        self.panel.addTab(PagePing(self.panel),'Ping')
         self.center()
         here = path.abspath(path.dirname(__file__))
         here = path.split(here)[0]
