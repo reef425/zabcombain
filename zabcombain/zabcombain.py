@@ -8,6 +8,16 @@ from os import getcwd,path,environ,name as osname
 import configparser
 from datetime import datetime
 
+
+def getlogin():
+    name = ''
+    if osname == "nt":
+        name = environ['username']
+    else:
+        name = environ['LOGNAME']
+    return name
+
+
 class Page(QWidget):
     def __init__(self,*args,**kwargs):
         super().__init__(*args,**kwargs)
@@ -28,7 +38,7 @@ class PageMain(Page):
     def __init__(self,*args,**kwargs):
         super().__init__(*args,**kwargs)
         self.loginfield = QLineEdit(self)
-        self.loginfield.setText(environ['username'])
+        self.loginfield.setText(getlogin())
         self.loginfield.setGeometry(10,10,100,25)
         self.passfield = QLineEdit(self)
         self.passfield.setGeometry(10,40,100,25)
