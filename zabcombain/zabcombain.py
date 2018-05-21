@@ -36,9 +36,6 @@ class PageMain(Page):
         self.settingButton.pressed.connect(self.OnPressSetting)
 
     def OnPressLogin(self):
-        self.console.appendPlainText(self.loginfield.text())
-        self.console.appendPlainText(self.passfield.text())
-        self.console.appendPlainText(self.settings.hostname)
         error,self.parent.api = getApi(self.settings.hostname, self.loginfield.text(),self.passfield.text())
         self.console.appendPlainText(error+"\n")
 
