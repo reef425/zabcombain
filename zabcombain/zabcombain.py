@@ -45,10 +45,10 @@ class PageMain(Page):
         self.passfield.setEchoMode(2)
         self.loginButton = QPushButton('login',self)
         self.loginButton.setGeometry(10,70,100,25)
-        self.loginButton.pressed.connect(self.OnPressLogin)
+        self.loginButton.clicked.connect(self.OnPressLogin)
         self.settingButton = QPushButton('settings',self)
         self.settingButton.setGeometry(10,100,100,25)
-        self.settingButton.pressed.connect(self.OnPressSetting)
+        self.settingButton.clicked.connect(self.OnPressSetting)
 
     def OnPressLogin(self):
         error,self.parent.api = getApi(self.settings.hostname, self.loginfield.text(),self.passfield.text())
@@ -110,8 +110,8 @@ class PageOrder(Page):
         self.proccButton.setGeometry(w-70,55,60,25)
         self.inputCheckBox =  QCheckBox('Contin.',self)
         self.inputCheckBox.move(w-70,85)
-        self.pasteButton.pressed.connect(self.OnPressPaste)
-        self.proccButton.pressed.connect(self.OnPressProcess)
+        self.pasteButton.clicked.connect(self.OnPressPaste)
+        self.proccButton.clicked.connect(self.OnPressProcess)
         # Output
         self.outputLabel = QLabel('Output',self)
         self.outputLabel.move(5,210)
@@ -119,7 +119,7 @@ class PageOrder(Page):
         self.outputField.setGeometry(5,230,w-80,160)
         self.copyButton = QPushButton('Copy',self)
         self.copyButton.setGeometry(w-70,230,60,25)
-        self.copyButton.pressed.connect(self.OnSelectCopy)
+        self.copyButton.clicked.connect(self.OnSelectCopy)
 
 
     def OnPressPaste(self):
@@ -198,12 +198,12 @@ class PagePing(Page):
         # update button
         self.updateBtn = QPushButton('Update',self)
         self.updateBtn.setGeometry(230,25,110,25)
-        self.updateBtn.pressed.connect(self.onPressUpdate)
+        self.updateBtn.clicked.connect(self.onPressUpdate)
         # ping button
         self.pingButton = QPushButton('Ping',self)
         self.pingButton.setGeometry(5,110,100,25)
         self.pingButton.setEnabled(False)
-        self.pingButton.pressed.connect(self.OnPressPing)
+        self.pingButton.clicked.connect(self.OnPressPing)
         # output field
         self.outputLb = QLabel('Output',self)
         self.outputLb.move(5,210)
