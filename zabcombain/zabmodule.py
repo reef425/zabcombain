@@ -88,7 +88,10 @@ def runRemoteServerScript(api,host):
         result = api.script.execute(hostid=host.get("hostid"),scriptid="1")
     except Exception as err:
         print(err)
-    host.update([("pingresult",result.get("value"))])
+    finally:
+        if result is none:
+            result = {'value':'get not data'}
+    host.update([('pingresult',result.get('value'))])
 
 def pingFromOS(ip):
     if ip is None:
