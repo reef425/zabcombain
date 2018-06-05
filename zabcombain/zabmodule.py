@@ -89,7 +89,7 @@ def runRemoteServerScript(api,host):
     except Exception as err:
         print(err)
     finally:
-        if result is none:
+        if result is None:
             result = {'value':'get not data'}
     host.update([('pingresult',result.get('value'))])
 
