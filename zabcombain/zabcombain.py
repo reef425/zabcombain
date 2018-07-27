@@ -51,7 +51,7 @@ class PageMain(Page):
         self.vlayout.addWidget(self.pass_field, Qt.AlignTop, Qt.AlignLeft)
         self.vlayout.addWidget(self.loginButton, Qt.AlignTop, Qt.AlignLeft)
         self.vlayout.addWidget(self.settingButton, Qt.AlignTop, Qt.AlignLeft)
-        self.vlayout.addSpacing(100)
+        self.vlayout.addSpacing(1000)
 
     def OnPressLogin(self):
         error, self.parent.api = getApi(self.settings.hostname, self.login_field.text(), self.pass_field.text())
@@ -329,12 +329,11 @@ class Settings(object):
 class MainWindow(QtWidgets.QMainWindow):
     def __init__(self, *args, **kwargs):
         super(MainWindow, self).__init__(*args, **kwargs)
-        self.api = None
         self.initUI()
 
     def initUI(self):
-        self.width = 640
-        self.height = 480
+        self.width = 480
+        self.height = 640
         self.resize(self.width, self.height)
         self.setMinimumSize(360, 400)
         QtWidgets.QToolTip.setFont(QFont('SansSerif', 10))
@@ -344,6 +343,7 @@ class MainWindow(QtWidgets.QMainWindow):
         self.centralwidget.setObjectName("centralwidget")
         self.setCentralWidget(self.centralwidget)
         self.centralwidget.settings = Settings()
+        self.centralwidget.api = None
 
         sizePolicy = QtWidgets.QSizePolicy(QtWidgets.QSizePolicy.Expanding, QtWidgets.QSizePolicy.Minimum)
         sizePolicy.setHorizontalStretch(0)
