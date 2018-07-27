@@ -1,15 +1,14 @@
 import sys
-from PyQt5.QtWidgets import *
-from PyQt5.QtGui import QFont,QIcon
-from PyQt5.QtCore import *
+from PyQt5 import QtWidgets
+from PyQt5.QtGui import QFont, QIcon
+from PyQt5.QtCore import QThread, pyqtSignal, Qt
 from .zabmodule import *
-from threading import Thread,Lock
-from os import getcwd,path,environ,name as osname
+from os import path, environ, name as osname
 import configparser
 from datetime import datetime
 
 
-def getlogin():
+def get_login():
     name = ''
     if osname == "nt":
         name = environ['username']
@@ -18,109 +17,122 @@ def getlogin():
     return name
 
 
-class Page(QWidget):
-    def __init__(self,*args,**kwargs):
-        super().__init__(*args,**kwargs)
-        # print(self.parentWidget())
+class Page(QtWidgets.QWidget):
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
         self.parent = self.parentWidget().parentWidget()
         self.settings = self.parentWidget().parentWidget().settings
-        self.console  = self.parentWidget().parentWidget().console
+        self.console = self.parentWidget().parentWidget().console
 
-
-    def consoleLog(self,text):
+    def consoleLog(self, text):
         dt = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
         self.console.appendPlainText(dt + ' ' + text)
+
 
 class PageMain(Page):
     """
     docstring PageMain
     """
-    def __init__(self,*args,**kwargs):
-        super().__init__(*args,**kwargs)
-        self.loginfield = QLineEdit(self)
-        self.loginfield.setText(getlogin())
-        self.loginfield.setGeometry(10,10,100,25)
-        self.passfield = QLineEdit(self)
-        self.passfield.setGeometry(10,40,100,25)
-        self.passfield.setEchoMode(2)
-        self.loginButton = QPushButton('login',self)
-        self.loginButton.setGeometry(10,70,100,25)
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.login_field = QtWidgets.QLineEdit(self)
+        self.login_field.setText(get_login())
+        self.pass_field = QtWidgets.QLineEdit(self)
+        self.pass_field.setEchoMode(2)
+        self.loginButton = QtWidgets.QPushButton('login', self)
         self.loginButton.clicked.connect(self.OnPressLogin)
-        self.settingButton = QPushButton('settings',self)
-        self.settingButton.setGeometry(10,100,100,25)
+        self.settingButton = QtWidgets.QPushButton('settings', self)
         self.settingButton.clicked.connect(self.OnPressSetting)
 
+        self.vlayout = QtWidgets.QVBoxLayout()
+        self.setLayout(self.vlayout)
+        self.vlayout.addWidget(self.login_field, Qt.AlignTop, Qt.AlignLeft)
+        self.vlayout.addWidget(self.pass_field, Qt.AlignTop, Qt.AlignLeft)
+        self.vlayout.addWidget(self.loginButton, Qt.AlignTop, Qt.AlignLeft)
+        self.vlayout.addWidget(self.settingButton, Qt.AlignTop, Qt.AlignLeft)
+        self.vlayout.addSpacing(100)
+
     def OnPressLogin(self):
-        error,self.parent.api = getApi(self.settings.hostname, self.loginfield.text(),self.passfield.text())
+        error, self.parent.api = getApi(self.settings.hostname, self.login_field.text(), self.pass_field.text())
         self.consoleLog(error)
 
     def OnPressSetting(self):
-        text, ok = QInputDialog.getMultiLineText(self, 'Settings','Write otions',self.settings.readValue)
+        text, ok = QtWidgets.QInputDialog.getMultiLineText(self, 'Settings', 'Write otions', self.settings.readValue)
         if ok:
             self.settings.saveSetting(str(text))
             self.settings.readSetting()
 
+
 class WorkerOrder(QThread):
-        finished = pyqtSignal(str)
-        def __init__(self,parent = None ):
-            super(WorkerOrder,self).__init__(parent)
+    finished = pyqtSignal(str)
 
-        def setAPI(self,api):
-            self.api = api
+    def __init__(self, parent=None):
+        super(WorkerOrder, self).__init__(parent)
 
-        def setHosts(self,hosts):
-            self.hosts = hosts
+    def setAPI(self, api):
+        self.api = api
 
-        def getDataPing(self):
-            initHostsFromServer(self.api,self.hosts)
-            pingRuner(self.api,self.hosts)
-            res = ''
-            for host in self.hosts:
-                res+='{:<9}:{}\n'.format('name',host.get('name'))
-                res+='{:<9}:{}\n'.format('hostname',host.get('host'))
-                if host.setdefault('issues',False):
-                    for issue in host.get('issues'):
-                        res+='{:<9}:{}\n'.format('issue',issue.get('issue'))
-                        res+='{:<9}:{}\n'.format('agetime',issue.get('agetime'))
-                res+='\nZABBIX PING RESULT\n\n'
-                res+=host['pingresult']
-                res+='\nINTERFACES PING RESULT\n\n'
-                for item in host['interfaces']:
-                    res += item['res']
-                    res+='\n'
-            return res
+    def setHosts(self, hosts):
+        self.hosts = hosts
 
-        def run(self):
-            self.finished.emit(self.getDataPing())
+    def getDataPing(self):
+        initHostsFromServer(self.api, self.hosts)
+        pingRuner(self.api, self.hosts)
+        res = ''
+        for host in self.hosts:
+            res += '{:<9}:{}\n'.format('name', host.get('name'))
+            res += '{:<9}:{}\n'.format('hostname', host.get('host'))
+            if host.setdefault('issues', False):
+                for issue in host.get('issues'):
+                    res += '{:<9}:{}\n'.format('issue', issue.get('issue'))
+                    res += '{:<9}:{}\n'.format('agetime', issue.get('agetime'))
+            res += '\nZABBIX PING RESULT\n\n'
+            res += host['pingresult']
+            res += '\nINTERFACES PING RESULT\n\n'
+            for item in host['interfaces']:
+                res += item['res']
+                res += '\n'
+        return res
+
+    def run(self):
+        self.finished.emit(self.getDataPing())
+
 
 class PageOrder(Page):
-    def __init__(self,*args,**kwargs):
-        super().__init__(*args,**kwargs)
-        w = self.parentWidget().geometry().width()
-        h = self.parentWidget().geometry().height()
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
         # Zabbix api - self.api
         self.api = None
-        self.inputLabel = QLabel('Input',self)
-        self.inputLabel.move(5,5)
-        self.inputField = QPlainTextEdit(self)
-        self.inputField.setGeometry(5,25,w-80,160)
-        self.pasteButton = QPushButton('Paste',self)
-        self.pasteButton.setGeometry(w-70,25,60,25)
-        self.proccButton = QPushButton('Proccess',self)
-        self.proccButton.setGeometry(w-70,55,60,25)
-        self.inputCheckBox =  QCheckBox('Contin.',self)
-        self.inputCheckBox.move(w-70,85)
+
+        self.inputLabel = QtWidgets.QLabel('Input', self)
+        self.inputField = QtWidgets.QPlainTextEdit(self)
+        self.pasteButton = QtWidgets.QPushButton('Paste', self)
+        self.proccButton = QtWidgets.QPushButton('Proccess', self)
+        self.inputCheckBox = QtWidgets.QCheckBox('Contin.', self)
+        self.glayuot = QtWidgets.QGridLayout()
+        self.setLayout(self.glayuot)
+
         self.pasteButton.clicked.connect(self.OnPressPaste)
         self.proccButton.clicked.connect(self.OnPressProcess)
         # Output
-        self.outputLabel = QLabel('Output',self)
-        self.outputLabel.move(5,210)
-        self.outputField = QPlainTextEdit(self)
-        self.outputField.setGeometry(5,230,w-80,160)
-        self.copyButton = QPushButton('Copy',self)
-        self.copyButton.setGeometry(w-70,230,60,25)
+        self.outputLabel = QtWidgets.QLabel('Output', self)
+        self.outputField = QtWidgets.QPlainTextEdit(self)
+        self.copyButton = QtWidgets.QPushButton('Copy', self)
         self.copyButton.clicked.connect(self.OnSelectCopy)
 
+        self.glayuot.addWidget(self.inputLabel, 1, 1, 1, 1)
+        self.glayuot.addWidget(self.inputField, 2, 1, 1, 1)
+
+        self.vlayuot = QtWidgets.QVBoxLayout()
+        self.vlayuot.addWidget(self.pasteButton)
+        self.vlayuot.addWidget(self.proccButton)
+        self.vlayuot.addWidget(self.inputCheckBox)
+
+        self.glayuot.addLayout(self.vlayuot, 2, 2, Qt.AlignTop)
+        self.glayuot.addWidget(self.outputLabel, 3, 1, 1, 1)
+        self.glayuot.addWidget(self.outputField, 4, 1, 1, 1)
+        self.glayuot.addWidget(self.copyButton, 4, 2, 1, 1, Qt.AlignTop)
 
     def OnPressPaste(self):
         if self.inputField.canPaste():
@@ -146,9 +158,9 @@ class PageOrder(Page):
     def process(self):
         self.hosts = initHostsFromData(self.getItems())
         self.consoleLog('Order process')
-        self.consoleLog('Hosts = %d'%len(self.hosts))
-        for i,v in enumerate(self.hosts):
-            self.consoleLog('%d %s'%(i+1,v.get('name')))
+        self.consoleLog('Hosts = %d' % len(self.hosts))
+        for i, v in enumerate(self.hosts):
+            self.consoleLog('%d %s' % (i + 1, v.get('name')))
         try:
             self.wo = WorkerOrder()
             self.wo.setAPI(self.parent.api)
@@ -156,14 +168,14 @@ class PageOrder(Page):
             self.wo.start()
             self.wo.finished.connect(self.getWorkerResult)
         except Exception as er:
-            print('error start Thread',er)
+            print('error start Thread', er)
 
-    def getWorkerResult(self,res):
+    def getWorkerResult(self, res):
         self.outputField.clear()
         self.outputField.appendPlainText(res)
 
     def OnSelectCopy(self):
-        if self.outputField.toPlainText()=='':
+        if self.outputField.toPlainText() == '':
             self.consoleLog('Output is empty')
         else:
             self.outputField.selectAll()
@@ -175,40 +187,48 @@ class PageOrder(Page):
         if text:
             for line in text.split('\n'):
                 items = line.split('\t')
-                if len(items)!=1:
+                if len(items) != 1:
                     yield items
 
+
 class PagePing(Page):
-    def __init__(self,*args,**kwargs):
-        super().__init__(*args,**kwargs)
-        w = self.parentWidget().geometry().width()
-        h = self.parentWidget().geometry().height()
-        self.groupLb = QLabel('Groups',self)
-        self.groupLb.move(5,5)
-        self.selectGroup = QComboBox(self)
-        self.selectGroup.setGeometry(5,25,220,25)
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.glayuot = QtWidgets.QGridLayout()
+        self.setLayout(self.glayuot)
+
+        self.groupLb = QtWidgets.QLabel('Groups', self)
+        self.selectGroup = QtWidgets.QComboBox(self)
+        sizePolicy = QtWidgets.QSizePolicy(QtWidgets.QSizePolicy.Expanding, QtWidgets.QSizePolicy.Minimum)
+        self.selectGroup.setSizePolicy(sizePolicy)
+        self.selectGroup.setMinimumWidth(200)
         self.selectGroup.setEnabled(False)
         self.selectGroup.currentIndexChanged.connect(self.OnSelectGroup)
-        self.hostLb = QLabel('Hosts',self)
-        self.hostLb.move(5,55)
-        self.selectHost = QComboBox(self)
-        self.selectHost.setGeometry(5,75,220,25)
+        self.hostLb = QtWidgets.QLabel('Hosts', self)
+        self.selectHost = QtWidgets.QComboBox(self)
         self.selectHost.setEnabled(False)
-        self.selectGroup.currentIndexChanged.connect(self.OnSelectHost)
+        self.selectHost.currentIndexChanged.connect(self.OnSelectHost)
+        self.selectHost.setSizePolicy(sizePolicy)
+        self.selectHost.setMinimumWidth(200)
         # update button
-        self.updateBtn = QPushButton('Update',self)
-        self.updateBtn.setGeometry(230,25,110,25)
+        self.updateBtn = QtWidgets.QPushButton('Update', self)
         self.updateBtn.clicked.connect(self.onPressUpdate)
         # ping button
-        self.pingButton = QPushButton('Ping',self)
-        self.pingButton.setGeometry(5,110,100,25)
+        self.pingButton = QtWidgets.QPushButton('Ping', self)
         self.pingButton.setEnabled(False)
         self.pingButton.clicked.connect(self.OnPressPing)
         # output field
-        self.outputLb = QLabel('Output',self)
-        self.outputLb.move(5,210)
-        self.outputField = QPlainTextEdit(self)
-        self.outputField.setGeometry(5,230,w-80,160)
+        self.outputLb = QtWidgets.QLabel('Output', self)
+        self.outputField = QtWidgets.QPlainTextEdit(self)
+
+        self.glayuot.addWidget(self.groupLb, 0, 0, 1, 1, Qt.AlignLeft)
+        self.glayuot.addWidget(self.selectGroup, 1, 0, 1, 2, Qt.AlignLeft)
+        self.glayuot.addWidget(self.updateBtn, 1, 1, 1, 1, Qt.AlignLeft)
+        self.glayuot.addWidget(self.hostLb, 2, 0, 1, 1, Qt.AlignLeft)
+        self.glayuot.addWidget(self.selectHost, 3, 0, 1, 1, Qt.AlignLeft)
+        self.glayuot.addWidget(self.pingButton, 4, 0, 1, 1, Qt.AlignLeft)
+        self.glayuot.addWidget(self.outputLb, 5, 0, 1, 1, Qt.AlignLeft)
+        self.glayuot.addWidget(self.outputField, 6, 0, 1, 5)
 
     def onPressUpdate(self):
         if not self.parent.api:
@@ -222,14 +242,15 @@ class PagePing(Page):
 
     def getGroups(self):
         for item in self.parent.api.hostgroup.get():
-            yield item['name'],item['groupid']
+            yield item['name'], item['groupid']
 
-    def getHosts(self, groupid = None):
-        output=['hostid','host','name','description','groups','interfaces']
-        for item in self.parent.api.host.get(groupids=[groupid],filter={'status':'0'},output=output,selectInterfaces='extend'):
-            yield item['name'],item
+    def getHosts(self, groupid=None):
+        output = ['hostid', 'host', 'name', 'description', 'groups', 'interfaces']
+        for item in self.parent.api.host.get(groupids=[groupid], filter={'status': '0'}, output=output,
+                                             selectInterfaces='extend'):
+            yield item['name'], item
 
-    def OnSelectGroup(self,index):
+    def OnSelectGroup(self, index):
         key = self.selectGroup.currentText()
         self.hosts = dict(self.getHosts(self.groups[key]))
         items = list(self.hosts.keys())
@@ -238,7 +259,7 @@ class PagePing(Page):
         self.selectHost.addItems(items)
         self.selectHost.setEnabled(True)
 
-    def OnSelectHost(self,index):
+    def OnSelectHost(self, index):
         self.pingButton.setEnabled(True)
 
     def OnPressPing(self):
@@ -257,7 +278,7 @@ class PagePing(Page):
         key = self.selectHost.currentText()
         host = initHost()
         host.update(self.hosts[key].items())
-        self.consoleLog('Ping for '+host.get('name'))
+        self.consoleLog('Ping for ' + host.get('name'))
         try:
             self.wo = WorkerOrder()
             self.wo.setAPI(self.parent.api)
@@ -265,83 +286,106 @@ class PagePing(Page):
             self.wo.start()
             self.wo.finished.connect(self.getWorkerResult)
         except Exception as er:
-            print('error start Thread',er)
+            print('error start Thread', er)
 
-    def getWorkerResult(self,res):
+    def getWorkerResult(self, res):
         self.outputField.clear()
         self.outputField.appendPlainText(res)
 
-class Settings():
+
+class Settings(object):
     def __init__(self):
         self.defaultValue = '[server]\nhost = http://127.0.0.1/zabbix\n'
         if osname == 'nt':
-            self.home = path.join('c:\\',environ['HOMEPATH'])
+            self.home = path.join('c:\\', environ['HOMEPATH'])
         else:
             self.home = environ['HOME']
-        self.here = path.join(self.home,'.zabcombain')
+        self.here = path.join(self.home, '.zabcombain')
         self.hostname = None
         self.readSetting()
 
     def readSetting(self):
         if path.exists(self.here):
-            with open(self.here,'r') as f:
+            with open(self.here, 'r') as f:
                 self.readValue = f.read()
         else:
-            self.readValue=self.defaultValue
-            with open(self.here,'w') as f:
+            self.readValue = self.defaultValue
+            with open(self.here, 'w') as f:
                 f.write(self.defaultValue)
-        self.parseSetting()
+        self.parse_setting()
 
-    def saveSetting(self,value):
+    def saveSetting(self, value):
         if self.readValue != value:
-            with open(self.here,'w') as f:
+            with open(self.here, 'w') as f:
                 f.write(value)
             self.readValue = value
 
-    def parseSetting(self):
+    def parse_setting(self):
         config = configparser.ConfigParser()
         config.read(self.here)
         self.hostname = config['server']['host']
 
-class MainWindow(QMainWindow):
-    def __init__(self,*args,**kwargs):
-        super(MainWindow,self).__init__(*args,**kwargs)
+
+class MainWindow(QtWidgets.QMainWindow):
+    def __init__(self, *args, **kwargs):
+        super(MainWindow, self).__init__(*args, **kwargs)
         self.api = None
-        self.settings = Settings()
         self.initUI()
 
     def initUI(self):
-        self.width = 600
-        self.height = 600
-        self.resize(self.width,self.height)
-        QToolTip.setFont(QFont('SansSerif',10))
+        self.width = 640
+        self.height = 480
+        self.resize(self.width, self.height)
+        self.setMinimumSize(360, 400)
+        QtWidgets.QToolTip.setFont(QFont('SansSerif', 10))
         self.setToolTip('Zabcombain')
-        self.console = QPlainTextEdit(self)
-        self.console.setGeometry(5,450,self.width-10,120)
-        self.panel = QTabWidget(self)
-        self.panel.setGeometry(5,5,self.width-10,440)
-        self.panel.addTab(PageMain(self.panel),'Main')
-        self.panel.addTab(PageOrder(self.panel),'Oreders')
-        self.panel.addTab(PagePing(self.panel),'Ping')
+
+        self.centralwidget = QtWidgets.QWidget(self)
+        self.centralwidget.setObjectName("centralwidget")
+        self.setCentralWidget(self.centralwidget)
+        self.centralwidget.settings = Settings()
+
+        sizePolicy = QtWidgets.QSizePolicy(QtWidgets.QSizePolicy.Expanding, QtWidgets.QSizePolicy.Minimum)
+        sizePolicy.setHorizontalStretch(0)
+        sizePolicy.setVerticalStretch(0)
+
+        self.console = QtWidgets.QPlainTextEdit(self.centralwidget)
+        self.console.setSizePolicy(sizePolicy)
+        self.console.setMaximumHeight(150)
+
+        self.panel = QtWidgets.QTabWidget(self.centralwidget)
+        self.centralwidget.console = self.console
+
+        self.vlayout = QtWidgets.QVBoxLayout()
+        self.vlayout.addWidget(self.panel)
+        self.vlayout.addWidget(self.console)
+        self.centralwidget.setLayout(self.vlayout)
+
+        self.panel.addTab(PageMain(self.panel), 'Main')
+        self.panel.addTab(PageOrder(self.panel), 'Oreders')
+        self.panel.addTab(PagePing(self.panel), 'Ping')
+
         self.center()
         here = path.abspath(path.dirname(__file__))
         here = path.split(here)[0]
-        icon_file = path.join(here,'data','favicon.ico')
+        icon_file = path.join(here, 'data', 'favicon.ico')
         icon = QIcon(path.abspath(icon_file))
+
         self.setWindowIcon(icon)
         self.setWindowTitle('Zabcombain')
         self.show()
 
     def center(self):
         qr = self.frameGeometry()
-        cp = QDesktopWidget().availableGeometry().center()
+        cp = QtWidgets.QDesktopWidget().availableGeometry().center()
         qr.moveCenter(cp)
         self.move(qr.topLeft())
 
+
 if __name__ == '__main__':
     # Next, create an application object.
-    QApplication.setDesktopSettingsAware(False)
-    app = QApplication(sys.argv)
+    QtWidgets.QApplication.setDesktopSettingsAware(False)
+    app = QtWidgets.QApplication(sys.argv)
     # Show it.
     frame = MainWindow(None)
     # Start the event loop.
