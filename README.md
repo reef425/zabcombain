@@ -34,7 +34,7 @@ rtt min/avg/max/mdev = 0.040/0.056/0.078/0.018 ms
 Zabcombain preview
 ![alt text][logo]
 
-[logo]: /https://github.com/reef425/zabcombain/img/zabcombain-preview.gif "Main window preview"
+[logo]: https://github.com/reef425/zabcombain/blob/master/img/zabcombain-preview.gif "Main window preview"
 
 pypi version 2.0.3
 
